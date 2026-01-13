@@ -10,6 +10,7 @@ from api.smoking_tracker import router as smoking_router
 from api.workout_tracker import router as workout_router
 from api.health import router as health_router
 from api.db_tasks import router as db_tasks_router
+from api.dashboard import router as dashboard_router
 
 settings = Settings()
 
@@ -25,6 +26,7 @@ app.add_middleware(
 	allow_headers=["*"],
 )
 
+app.include_router(dashboard_router, prefix="/api/dashboard", tags=["dashboard"])
 app.include_router(smoking_router, prefix="/api/smoking", tags=["smoking"])
 app.include_router(workout_router, prefix="/api/workouts", tags=["workouts"])
 app.include_router(health_router, prefix="/api/health", tags=["health"])
