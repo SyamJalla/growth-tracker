@@ -1,0 +1,47 @@
+version: '3.8'
+
+services:
+  # Growth Tracker API
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: growth-tracker-api
+    ports:
+      - "8000:8000"
+    environment:
+      # Set environment (local, dev, or prod)
+      - ENV=${ENV:-local}
+    volumes:
+      # Mount config.ini for database credentials (create this file first!)
+      - ./config.ini:/app/config.ini:ro
+      # Mount environment file
+      - ./.env.${ENV:-local}:/app/.env.${ENV:-local}:ro
+    depends_on:
+      - db
+    restart: unless-stopped
+    networks:
+      - growth-tracker-network
+
+  # PostgreSQL Database
+  db:
+    image: postgres:15-alpine
+    container_name: growth-tracker-db
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-root}
+      POSTGRES_DB: ${POSTGRES_DB:-growth_tracker}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    restart: unless-stopped
+    networks:
+      - growth-tracker-network
+
+networks:
+  growth-tracker-network:
+    driver: bridge
+
+volumes:
+  postgres_data:
