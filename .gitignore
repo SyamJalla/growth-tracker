@@ -46,6 +46,10 @@ logs/
 # Environment variables
 .env
 .env.local
+.env.*.local
+
+# Config file with sensitive database credentials
+Backend/config.ini
 
 # Build artifacts
 build/

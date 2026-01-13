@@ -1,0 +1,14 @@
+# Database Configuration Template
+# Copy this file to config.ini and update with your actual credentials
+
+[local]
+database_url = postgresql+psycopg2://postgres:root@localhost:5432/growth_tracker
+admin_database_url = postgresql+psycopg2://postgres:root@localhost:5432/postgres
+
+[dev]
+database_url = postgresql+psycopg2://postgres:password@dev-db-host:5432/growth_tracker_dev
+admin_database_url = postgresql+psycopg2://postgres:password@dev-db-host:5432/postgres
+
+[prod]
+database_url = postgresql+psycopg2://postgres:secure_password@prod-db-host:5432/growth_tracker_prod
+admin_database_url = postgresql+psycopg2://postgres:secure_password@prod-db-host:5432/postgres
