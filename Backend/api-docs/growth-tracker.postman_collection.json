@@ -1,0 +1,120 @@
+
+{
+  "info": {
+    "name": "Growth Tracker API",
+    "_postman_id": "growth-tracker-collection",
+    "description": "# Growth Tracker API\n\nA FastAPI-based backend for tracking personal growth metrics including smoking and workout activities.\n\n## Features\n- Health check endpoints\n- Database management utilities\n- Smoking tracker (placeholder)\n- Workout tracker (placeholder)\n\n## Setup\n1. Ensure PostgreSQL is running\n2. Configure environment variables or use defaults\n3. Create database using `/db/create_database`\n4. Initialize tables using `/db/create_tables`\n\n## Variables\n- `protocol`: http or https (default: http)\n- `host`: server hostname (default: localhost)\n- `port`: server port (default: 8000)",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "protocol", "value": "http", "type": "string" },
+    { "key": "host", "value": "localhost", "type": "string" },
+    { "key": "port", "value": "8000", "type": "string" }
+  ],
+  "item": [
+    {
+      "name": "Root",
+      "description": "Basic API root endpoint to verify the service is running",
+      "item": [
+        {
+          "name": "GET /",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{protocol}}://{{host}}:{{port}}/",
+              "protocol": "{{protocol}}",
+              "host": ["{{host}}"],
+              "port": "{{port}}",
+              "path": [""]
+            },
+            "description": "Returns basic status information about the Growth Tracker API.\n\n**Expected Response:**\n```json\n{\n  \"status\": \"ok\",\n  \"message\": \"Growth Tracker API\"\n}\n```"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Health",
+      "description": "Health check endpoints to monitor application and database status",
+      "item": [
+        {
+          "name": "Check API Health",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{protocol}}://{{host}}:{{port}}/api/health/",
+              "protocol": "{{protocol}}",
+              "host": ["{{host}}"],
+              "port": "{{port}}",
+              "path": ["api", "health", ""]
+            },
+            "description": "Verifies that the API is running and responsive.\n\n**Expected Response (200 OK):**\n```json\n{\n  \"status\": \"ok\",\n  \"message\": \"Growth Tracker API running\"\n}\n```"
+          },
+          "response": []
+        },
+        {
+          "name": "Check Database Health",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{protocol}}://{{host}}:{{port}}/api/health/db",
+              "protocol": "{{protocol}}",
+              "host": ["{{host}}"],
+              "port": "{{port}}",
+              "path": ["api", "health", "db"]
+            },
+            "description": "Verifies database connectivity by executing a simple query.\n\n**Expected Response (200 OK):**\n```json\n{\n  \"status\": \"ok\",\n  \"db\": \"ok\"\n}\n```\n\n**Error Response (503 Service Unavailable):**\n```json\n{\n  \"detail\": \"Database unreachable\"\n}\n```"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Database Setup",
+      "description": "Utility endpoints for database initialization. Run these in order during first-time setup.",
+      "item": [
+        {
+          "name": "Create Database",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"db_name\": \"growth_tracker\"\n}"
+            },
+            "url": {
+              "raw": "{{protocol}}://{{host}}:{{port}}/db/create_database",
+              "protocol": "{{protocol}}",
+              "host": ["{{host}}"],
+              "port": "{{port}}",
+              "path": ["db", "create_database"]
+            },
+            "description": "Creates a new PostgreSQL database on the server.\n\n**Note:** This endpoint connects to the admin database (typically 'postgres') to create the new database. Configure `admin_database_url` in settings.\n\n**Request Body:**\n```json\n{\n  \"db_name\": \"growth_tracker\"\n}\n```\n\n**Success Response (200 OK):**\n```json\n{\n  \"status\": \"ok\",\n  \"detail\": \"database 'growth_tracker' created\"\n}\n```\n\n**If Already Exists:**\n```json\n{\n  \"status\": \"ok\",\n  \"detail\": \"database 'growth_tracker' already exists\"\n}\n```\n\n**Error Response (500):**\n```json\n{\n  \"detail\": \"<error message>\"\n}\n```"
+          },
+          "response": []
+        },
+        {
+          "name": "Create Tables",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{protocol}}://{{host}}:{{port}}/db/create_tables",
+              "protocol": "{{protocol}}",
+              "host": ["{{host}}"],
+              "port": "{{port}}",
+              "path": ["db", "create_tables"]
+            },
+            "description": "Creates all database tables defined in SQLAlchemy models.\n\n**Note:** This uses SQLAlchemy's `create_all()` which is idempotent - it will not recreate existing tables.\n\n**Success Response (200 OK):**\n```json\n{\n  \"status\": \"ok\",\n  \"detail\": \"tables created or already exist\"\n}\n```\n\n**Error Response (500):**\n```json\n{\n  \"detail\": \"<error message>\"\n}\n```"
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}

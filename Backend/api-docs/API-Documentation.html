@@ -1,0 +1,805 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Growth Tracker API Documentation</title>
+    <style>
+        @media print {
+            body { margin: 0; }
+            .page-break { page-break-before: always; }
+        }
+        
+        * { box-sizing: border-box; }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px 20px;
+            background: #f9f9f9;
+        }
+        
+        .container {
+            background: white;
+            padding: 60px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        h1 {
+            color: #2c3e50;
+            border-bottom: 4px solid #3498db;
+            padding-bottom: 15px;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+        }
+        
+        h2 {
+            color: #2c3e50;
+            margin-top: 40px;
+            margin-bottom: 20px;
+            font-size: 1.8em;
+            border-bottom: 2px solid #ecf0f1;
+            padding-bottom: 10px;
+        }
+        
+        h3 {
+            color: #34495e;
+            margin-top: 30px;
+            margin-bottom: 15px;
+            font-size: 1.3em;
+        }
+        
+        h4 {
+            color: #555;
+            margin-top: 20px;
+            margin-bottom: 10px;
+        }
+        
+        .badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 4px;
+            font-size: 0.85em;
+            font-weight: 600;
+            margin-right: 10px;
+            color: white;
+        }
+        
+        .badge.get { background: #27ae60; }
+        .badge.post { background: #3498db; }
+        .badge.put { background: #f39c12; }
+        .badge.delete { background: #e74c3c; }
+        
+        .endpoint {
+            background: #f8f9fa;
+            border-left: 4px solid #3498db;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+        
+        .endpoint-header {
+            font-size: 1.1em;
+            margin-bottom: 15px;
+        }
+        
+        .endpoint-url {
+            font-family: 'Courier New', monospace;
+            background: #2c3e50;
+            color: #ecf0f1;
+            padding: 12px 15px;
+            border-radius: 4px;
+            margin: 10px 0;
+            font-size: 0.95em;
+            overflow-x: auto;
+        }
+        
+        pre {
+            background: #282c34;
+            color: #abb2bf;
+            padding: 20px;
+            border-radius: 6px;
+            overflow-x: auto;
+            margin: 15px 0;
+            font-size: 0.9em;
+            line-height: 1.5;
+        }
+        
+        code {
+            font-family: 'Courier New', monospace;
+            background: #f4f4f4;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-size: 0.9em;
+            color: #e74c3c;
+        }
+        
+        pre code {
+            background: transparent;
+            color: inherit;
+            padding: 0;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            background: white;
+        }
+        
+        table th {
+            background: #34495e;
+            color: white;
+            padding: 12px;
+            text-align: left;
+            font-weight: 600;
+        }
+        
+        table td {
+            padding: 12px;
+            border-bottom: 1px solid #ecf0f1;
+        }
+        
+        table tr:hover {
+            background: #f8f9fa;
+        }
+        
+        .note {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+        
+        .note strong {
+            color: #856404;
+        }
+        
+        .success {
+            background: #d4edda;
+            border-left: 4px solid #28a745;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 4px;
+        }
+        
+        .error {
+            background: #f8d7da;
+            border-left: 4px solid #dc3545;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 4px;
+        }
+        
+        .info-box {
+            background: #d1ecf1;
+            border-left: 4px solid #17a2b8;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+        
+        .metadata {
+            color: #7f8c8d;
+            font-size: 0.9em;
+            margin-bottom: 30px;
+        }
+        
+        ul, ol {
+            margin: 15px 0;
+            padding-left: 30px;
+        }
+        
+        li {
+            margin: 8px 0;
+        }
+        
+        .toc {
+            background: #ecf0f1;
+            padding: 25px;
+            border-radius: 6px;
+            margin: 30px 0;
+        }
+        
+        .toc ul {
+            list-style: none;
+            padding-left: 0;
+        }
+        
+        .toc li {
+            margin: 8px 0;
+        }
+        
+        .toc a {
+            color: #2980b9;
+            text-decoration: none;
+            font-weight: 500;
+        }
+        
+        .toc a:hover {
+            color: #3498db;
+            text-decoration: underline;
+        }
+        
+        .status-code {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 3px;
+            font-weight: 600;
+            font-size: 0.9em;
+        }
+        
+        .status-200 { background: #d4edda; color: #155724; }
+        .status-400 { background: #fff3cd; color: #856404; }
+        .status-500 { background: #f8d7da; color: #721c24; }
+        .status-503 { background: #f8d7da; color: #721c24; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Growth Tracker API Documentation</h1>
+        
+        <div class="metadata">
+            <strong>Version:</strong> 1.0<br>
+            <strong>Base URL:</strong> <code>http://localhost:8000</code><br>
+            <strong>Last Updated:</strong> January 13, 2026
+        </div>
+
+        <div class="toc">
+            <h2>Table of Contents</h2>
+            <ul>
+                <li><a href="#overview">1. Overview</a></li>
+                <li><a href="#getting-started">2. Getting Started</a></li>
+                <li><a href="#authentication">3. Authentication</a></li>
+                <li><a href="#endpoints">4. API Endpoints</a>
+                    <ul style="padding-left: 20px;">
+                        <li><a href="#root">Root Endpoint</a></li>
+                        <li><a href="#health">Health Check</a></li>
+                        <li><a href="#database">Database Setup</a></li>
+                    </ul>
+                </li>
+                <li><a href="#errors">5. Error Handling</a></li>
+                <li><a href="#models">6. Data Models</a></li>
+                <li><a href="#config">7. Configuration</a></li>
+            </ul>
+        </div>
+
+        <h2 id="overview">1. Overview</h2>
+        
+        <p>The Growth Tracker API is a FastAPI-based backend service designed to track personal growth metrics. It provides endpoints for health monitoring, database management, and future features for tracking smoking and workout activities.</p>
+        
+        <h3>Features</h3>
+        <ul>
+            <li>✅ Health check endpoints for application and database monitoring</li>
+            <li>✅ Database initialization and management utilities</li>
+            <li>✅ RESTful API design</li>
+            <li>✅ CORS support for cross-origin requests</li>
+            <li>🔄 Smoking tracker (planned)</li>
+            <li>🔄 Workout tracker (planned)</li>
+        </ul>
+
+        <h3>Tech Stack</h3>
+        <ul>
+            <li><strong>Framework:</strong> FastAPI</li>
+            <li><strong>Database:</strong> PostgreSQL</li>
+            <li><strong>ORM:</strong> SQLAlchemy</li>
+            <li><strong>Server:</strong> Uvicorn</li>
+        </ul>
+
+        <div class="page-break"></div>
+
+        <h2 id="getting-started">2. Getting Started</h2>
+
+        <h3>Prerequisites</h3>
+        <ul>
+            <li>Python 3.8+</li>
+            <li>PostgreSQL 12+</li>
+            <li>pip package manager</li>
+        </ul>
+
+        <h3>Installation</h3>
+        
+        <p><strong>1. Clone the repository</strong></p>
+        <pre><code>git clone &lt;repository-url&gt;
+cd growth-tracker/Backend</code></pre>
+
+        <p><strong>2. Install dependencies</strong></p>
+        <pre><code>pip install -r requirements.txt</code></pre>
+
+        <p><strong>3. Configure environment</strong></p>
+        <p>Create a <code>.env</code> file or use default settings:</p>
+        <pre><code>DATABASE_URL=postgresql+psycopg2://postgres:root@localhost:5432/growth_tracker
+ADMIN_DATABASE_URL=postgresql+psycopg2://postgres:root@localhost:5432/postgres</code></pre>
+
+        <p><strong>4. Start the server</strong></p>
+        <pre><code>uvicorn app:app --reload</code></pre>
+        <p>The API will be available at <code>http://localhost:8000</code></p>
+
+        <h3>Initial Setup</h3>
+        <div class="info-box">
+            <p>After starting the server, initialize the database:</p>
+            <ol>
+                <li>Create database: <code>POST /db/create_database</code></li>
+                <li>Create tables: <code>POST /db/create_tables</code></li>
+                <li>Verify: <code>GET /api/health/db</code></li>
+            </ol>
+        </div>
+
+        <div class="page-break"></div>
+
+        <h2 id="authentication">3. Authentication</h2>
+        
+        <div class="note">
+            <strong>Current Version:</strong> No authentication required<br><br>
+            All endpoints are currently open and do not require authentication. Authentication and authorization will be added in future versions.
+        </div>
+
+        <div class="page-break"></div>
+
+        <h2 id="endpoints">4. API Endpoints</h2>
+
+        <h3 id="root">Root Endpoint</h3>
+
+        <div class="endpoint">
+            <div class="endpoint-header">
+                <span class="badge get">GET</span>
+                <strong>Get API Status</strong>
+            </div>
+            <div class="endpoint-url">/</div>
+            
+            <p>Returns basic information about the API.</p>
+            
+            <h4>Response Example</h4>
+            <div class="success">
+                <strong>200 OK</strong>
+                <pre><code>{
+  "status": "ok",
+  "message": "Growth Tracker API"
+}</code></pre>
+            </div>
+
+            <h4>cURL Example</h4>
+            <pre><code>curl -X GET http://localhost:8000/</code></pre>
+        </div>
+
+        <div class="page-break"></div>
+
+        <h3 id="health">Health Check</h3>
+
+        <div class="endpoint">
+            <div class="endpoint-header">
+                <span class="badge get">GET</span>
+                <strong>Check Application Health</strong>
+            </div>
+            <div class="endpoint-url">/api/health/</div>
+            
+            <p>Verifies that the API application is running and responsive.</p>
+            
+            <h4>Response Example</h4>
+            <div class="success">
+                <strong>200 OK</strong>
+                <pre><code>{
+  "status": "ok",
+  "message": "Growth Tracker API running"
+}</code></pre>
+            </div>
+
+            <h4>Status Codes</h4>
+            <table>
+                <tr>
+                    <th>Code</th>
+                    <th>Description</th>
+                </tr>
+                <tr>
+                    <td><span class="status-code status-200">200</span></td>
+                    <td>Application is healthy</td>
+                </tr>
+            </table>
+
+            <h4>cURL Example</h4>
+            <pre><code>curl -X GET http://localhost:8000/api/health/</code></pre>
+
+            <div class="info-box">
+                <strong>Use Case:</strong> Use this endpoint for basic application monitoring and uptime checks.
+            </div>
+        </div>
+
+        <div class="endpoint">
+            <div class="endpoint-header">
+                <span class="badge get">GET</span>
+                <strong>Check Database Health</strong>
+            </div>
+            <div class="endpoint-url">/api/health/db</div>
+            
+            <p>Verifies database connectivity by executing a lightweight query.</p>
+            
+            <h4>Response Examples</h4>
+            <div class="success">
+                <strong>200 OK - Success</strong>
+                <pre><code>{
+  "status": "ok",
+  "db": "ok"
+}</code></pre>
+            </div>
+
+            <div class="error">
+                <strong>503 Service Unavailable - Failure</strong>
+                <pre><code>{
+  "detail": "Database unreachable"
+}</code></pre>
+            </div>
+
+            <h4>Status Codes</h4>
+            <table>
+                <tr>
+                    <th>Code</th>
+                    <th>Description</th>
+                </tr>
+                <tr>
+                    <td><span class="status-code status-200">200</span></td>
+                    <td>Database is connected and responsive</td>
+                </tr>
+                <tr>
+                    <td><span class="status-code status-503">503</span></td>
+                    <td>Database connection failed</td>
+                </tr>
+            </table>
+
+            <h4>cURL Example</h4>
+            <pre><code>curl -X GET http://localhost:8000/api/health/db</code></pre>
+
+            <div class="info-box">
+                <strong>Use Case:</strong> Use this endpoint to monitor database connectivity. Ideal for health checks in container orchestration systems (Kubernetes, Docker Compose).
+            </div>
+        </div>
+
+        <div class="page-break"></div>
+
+        <h3 id="database">Database Setup</h3>
+
+        <p>Utility endpoints for database initialization. These should be run during first-time setup or when resetting the database.</p>
+
+        <div class="endpoint">
+            <div class="endpoint-header">
+                <span class="badge post">POST</span>
+                <strong>Create Database</strong>
+            </div>
+            <div class="endpoint-url">/db/create_database</div>
+            
+            <p>Creates a new PostgreSQL database on the server.</p>
+            
+            <h4>Request Body</h4>
+            <pre><code>{
+  "db_name": "growth_tracker"
+}</code></pre>
+
+            <h4>Parameters</h4>
+            <table>
+                <tr>
+                    <th>Field</th>
+                    <th>Type</th>
+                    <th>Required</th>
+                    <th>Description</th>
+                </tr>
+                <tr>
+                    <td><code>db_name</code></td>
+                    <td>string</td>
+                    <td>Yes</td>
+                    <td>Name of the database to create (default: "growth_tracker")</td>
+                </tr>
+            </table>
+
+            <h4>Response Examples</h4>
+            <div class="success">
+                <strong>200 OK - New Database Created</strong>
+                <pre><code>{
+  "status": "ok",
+  "detail": "database 'growth_tracker' created"
+}</code></pre>
+            </div>
+
+            <div class="success">
+                <strong>200 OK - Already Exists</strong>
+                <pre><code>{
+  "status": "ok",
+  "detail": "database 'growth_tracker' already exists"
+}</code></pre>
+            </div>
+
+            <div class="error">
+                <strong>500 Internal Server Error</strong>
+                <pre><code>{
+  "detail": "&lt;error message&gt;"
+}</code></pre>
+            </div>
+
+            <h4>cURL Example</h4>
+            <pre><code>curl -X POST http://localhost:8000/db/create_database \
+  -H "Content-Type: application/json" \
+  -d '{"db_name": "growth_tracker"}'</code></pre>
+
+            <div class="note">
+                <strong>Important Notes:</strong>
+                <ul>
+                    <li>This endpoint connects to the admin database (typically 'postgres') using <code>admin_database_url</code></li>
+                    <li>Requires appropriate PostgreSQL permissions to create databases</li>
+                    <li>Idempotent - safe to call multiple times</li>
+                    <li>Must be run before creating tables</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="endpoint">
+            <div class="endpoint-header">
+                <span class="badge post">POST</span>
+                <strong>Create Tables</strong>
+            </div>
+            <div class="endpoint-url">/db/create_tables</div>
+            
+            <p>Creates all database tables defined in SQLAlchemy models.</p>
+            
+            <h4>Request Body</h4>
+            <p>None required</p>
+
+            <h4>Response Examples</h4>
+            <div class="success">
+                <strong>200 OK</strong>
+                <pre><code>{
+  "status": "ok",
+  "detail": "tables created or already exist"
+}</code></pre>
+            </div>
+
+            <div class="error">
+                <strong>500 Internal Server Error</strong>
+                <pre><code>{
+  "detail": "&lt;error message&gt;"
+}</code></pre>
+            </div>
+
+            <h4>Status Codes</h4>
+            <table>
+                <tr>
+                    <th>Code</th>
+                    <th>Description</th>
+                </tr>
+                <tr>
+                    <td><span class="status-code status-200">200</span></td>
+                    <td>Tables created successfully or already exist</td>
+                </tr>
+                <tr>
+                    <td><span class="status-code status-500">500</span></td>
+                    <td>Failed to create tables</td>
+                </tr>
+            </table>
+
+            <h4>cURL Example</h4>
+            <pre><code>curl -X POST http://localhost:8000/db/create_tables</code></pre>
+
+            <div class="note">
+                <strong>Important Notes:</strong>
+                <ul>
+                    <li>Uses SQLAlchemy's <code>create_all()</code> method</li>
+                    <li>Idempotent - will not recreate existing tables</li>
+                    <li>Automatically creates all tables defined in <code>db/models.py</code></li>
+                    <li>Database must exist before running this endpoint</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="page-break"></div>
+
+        <h2 id="errors">5. Error Handling</h2>
+
+        <p>The API follows standard HTTP status codes and returns errors in a consistent format.</p>
+
+        <h3>Error Response Format</h3>
+        <pre><code>{
+  "detail": "Error message describing what went wrong"
+}</code></pre>
+
+        <h3>Common Status Codes</h3>
+        <table>
+            <tr>
+                <th>Code</th>
+                <th>Description</th>
+                <th>When It Occurs</th>
+            </tr>
+            <tr>
+                <td><span class="status-code status-200">200</span></td>
+                <td>OK</td>
+                <td>Request succeeded</td>
+            </tr>
+            <tr>
+                <td><span class="status-code status-400">400</span></td>
+                <td>Bad Request</td>
+                <td>Invalid request parameters</td>
+            </tr>
+            <tr>
+                <td><span class="status-code status-400">404</span></td>
+                <td>Not Found</td>
+                <td>Endpoint doesn't exist</td>
+            </tr>
+            <tr>
+                <td><span class="status-code status-400">422</span></td>
+                <td>Unprocessable Entity</td>
+                <td>Request validation failed</td>
+            </tr>
+            <tr>
+                <td><span class="status-code status-500">500</span></td>
+                <td>Internal Server Error</td>
+                <td>Server-side error occurred</td>
+            </tr>
+            <tr>
+                <td><span class="status-code status-503">503</span></td>
+                <td>Service Unavailable</td>
+                <td>Database or service unreachable</td>
+            </tr>
+        </table>
+
+        <h3>Example Error Responses</h3>
+
+        <div class="error">
+            <strong>Validation Error (422)</strong>
+            <pre><code>{
+  "detail": [
+    {
+      "loc": ["body", "db_name"],
+      "msg": "field required",
+      "type": "value_error.missing"
+    }
+  ]
+}</code></pre>
+        </div>
+
+        <div class="error">
+            <strong>Database Unreachable (503)</strong>
+            <pre><code>{
+  "detail": "Database unreachable"
+}</code></pre>
+        </div>
+
+        <div class="page-break"></div>
+
+        <h2 id="models">6. Data Models</h2>
+
+        <h3>CreateDatabaseRequest</h3>
+        <p>Used for creating a new database.</p>
+        <pre><code>{
+  "db_name": "string"  // Required, default: "growth_tracker"
+}</code></pre>
+
+        <h3>Future Models</h3>
+        <p>The following models are defined but not yet used in active endpoints:</p>
+
+        <h4>SmokingEntry</h4>
+        <pre><code>{
+  "date": "string",           // Required, format: YYYY-MM-DD
+  "cigarettes": "integer",    // Required
+  "notes": "string"           // Optional
+}</code></pre>
+
+        <h4>WorkoutEntry</h4>
+        <pre><code>{
+  "date": "string",           // Required, format: YYYY-MM-DD
+  "activity": "string",       // Required (e.g., "Running", "Gym")
+  "duration_minutes": "integer",  // Required
+  "notes": "string"           // Optional
+}</code></pre>
+
+        <div class="page-break"></div>
+
+        <h2 id="config">7. Configuration</h2>
+
+        <p>The API can be configured using environment variables or a <code>.env</code> file.</p>
+
+        <h3>Available Settings</h3>
+        <table>
+            <tr>
+                <th>Variable</th>
+                <th>Type</th>
+                <th>Default</th>
+                <th>Description</th>
+            </tr>
+            <tr>
+                <td><code>APP_NAME</code></td>
+                <td>string</td>
+                <td>"Growth Tracker API"</td>
+                <td>Application name</td>
+            </tr>
+            <tr>
+                <td><code>ENV</code></td>
+                <td>string</td>
+                <td>"dev"</td>
+                <td>Environment (dev, staging, prod)</td>
+            </tr>
+            <tr>
+                <td><code>DATABASE_URL</code></td>
+                <td>string</td>
+                <td>postgresql+psycopg2://postgres:root@localhost:5432/growth_tracker</td>
+                <td>Main database connection string</td>
+            </tr>
+            <tr>
+                <td><code>ADMIN_DATABASE_URL</code></td>
+                <td>string</td>
+                <td>postgresql+psycopg2://postgres:root@localhost:5432/postgres</td>
+                <td>Admin database for creating databases</td>
+            </tr>
+            <tr>
+                <td><code>CORS_ORIGINS</code></td>
+                <td>list</td>
+                <td>["*"]</td>
+                <td>Allowed CORS origins</td>
+            </tr>
+        </table>
+
+        <h3>Example .env File</h3>
+        <pre><code>APP_NAME=Growth Tracker API
+ENV=production
+DATABASE_URL=postgresql+psycopg2://user:password@db-host:5432/growth_tracker
+ADMIN_DATABASE_URL=postgresql+psycopg2://user:password@db-host:5432/postgres
+CORS_ORIGINS=["https://app.example.com"]</code></pre>
+
+        <div class="page-break"></div>
+
+        <h2>Development Resources</h2>
+
+        <h3>Running Tests</h3>
+        <pre><code>pytest tests/</code></pre>
+
+        <h3>Interactive API Documentation</h3>
+        <p>FastAPI provides built-in interactive API documentation:</p>
+        <ul>
+            <li><strong>Swagger UI:</strong> <a href="http://localhost:8000/docs">http://localhost:8000/docs</a></li>
+            <li><strong>ReDoc:</strong> <a href="http://localhost:8000/redoc">http://localhost:8000/redoc</a></li>
+        </ul>
+
+        <h3>Project Structure</h3>
+        <pre><code>Backend/
+├── api/              # API route handlers
+├── core/             # Settings and configuration
+├── db/               # Database models and connection
+├── api-docs/         # API documentation and Postman collection
+├── tests/            # Test files
+├── app.py            # Main application entry point
+└── requirements.txt  # Python dependencies</code></pre>
+
+        <div class="page-break"></div>
+
+        <h2>Changelog</h2>
+
+        <h3>Version 1.0.0 (January 13, 2026)</h3>
+
+        <h4>Added</h4>
+        <ul>
+            <li>Root endpoint for basic status</li>
+            <li>Health check endpoints (app and database)</li>
+            <li>Database creation endpoint</li>
+            <li>Table creation endpoint</li>
+            <li>Comprehensive API documentation</li>
+        </ul>
+
+        <h4>Removed</h4>
+        <ul>
+            <li>S3 service integration</li>
+            <li>Alembic migration support</li>
+        </ul>
+
+        <h4>Planned</h4>
+        <ul>
+            <li>Smoking tracker endpoints</li>
+            <li>Workout tracker endpoints</li>
+            <li>Authentication and authorization</li>
+            <li>User management</li>
+        </ul>
+
+        <hr style="margin: 40px 0; border: none; border-top: 2px solid #ecf0f1;">
+        
+        <p style="text-align: center; color: #7f8c8d; font-style: italic;">End of Documentation</p>
+    </div>
+</body>
+</html>

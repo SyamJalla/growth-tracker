@@ -1,0 +1,64 @@
+# Exclude Android app
+HelloSyam/
+
+# Exclude OCR variants and tools
+ocr_variants/
+tools/
+
+# Exclude planning folder
+planning/
+
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Virtual environments
+venv/
+env/
+ENV/
+.venv
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Windows shortcuts
+*.lnk
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+
+# Logs
+*.log
+logs/
+
+# Environment variables
+.env
+.env.local
+
+# Build artifacts
+build/
+dist/
+*.egg-info/
+
+# Alembic
+*.pyc
+alembic/versions/*.pyc
+
+# Temporary files
+*.tmp
+*.bak
+
+# Exclude specific files
+BuildAndUpload.bat
