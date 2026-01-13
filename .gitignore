@@ -5,9 +5,6 @@ HelloSyam/
 ocr_variants/
 tools/
 
-# Exclude planning folder
-planning/
-
 # Python cache
 __pycache__/
 *.py[cod]

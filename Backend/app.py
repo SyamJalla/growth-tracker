@@ -21,12 +21,13 @@ if not os.getenv("TESTING"):
 
 app = FastAPI(title=settings.app_name)
 
+# Configure CORS
 app.add_middleware(
-	CORSMiddleware,
-	allow_origins=settings.cors_origins,
-	allow_credentials=True,
-	allow_methods=["*"],
-	allow_headers=["*"],
+    CORSMiddleware,
+    allow_origins=["*"],  # Allow all origins for development
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 app.include_router(dashboard_router, prefix="/api/dashboard", tags=["dashboard"])

@@ -48,32 +48,32 @@ export const healthApi = {
 
 // Dashboard API
 export const dashboardApi = {
-    getKPIs: () => api.get('/dashboard/kpis'),
-    getWeeklyProgress: () => api.get('/dashboard/weekly-progress'),
-    getTrends: () => api.get('/dashboard/trends'),
+    getKPIs: () => api.get('/dashboard/'),
+    getWeeklyProgress: () => api.get('/dashboard/'),
+    getTrends: () => api.get('/dashboard/'),
 };
 
 // Workout Tracker API
 export const workoutApi = {
-    getAllWorkouts: () => api.get('/workouts'),
-    getWorkoutById: (id) => api.get(`/workouts/${id}`),
-    logWorkout: (data) => api.post('/workouts', data),
-    updateWorkout: (id, data) => api.put(`/workouts/${id}`, data),
-    deleteWorkout: (id) => api.delete(`/workouts/${id}`),
-    getWeeklyStats: () => api.get('/workouts/stats/weekly'),
-    getMonthlyStats: () => api.get('/workouts/stats/monthly'),
+    getAllWorkouts: () => api.get('/workouts/history/'),
+    getWorkoutById: (date) => api.get(`/workouts/${date}`),
+    logWorkout: (data) => api.post('/workouts/', data),
+    updateWorkout: (date, data) => api.put(`/workouts/${date}`, data),
+    deleteWorkout: (date) => api.delete(`/workouts/${date}`),
+    getWeeklyStats: () => api.get('/dashboard/'), // Use dashboard endpoint
+    getMonthlyStats: () => api.get('/dashboard/'), // Use dashboard endpoint
 };
 
 // Smoking Tracker API
 export const smokingApi = {
-    getAllEntries: () => api.get('/smoking'),
-    getEntryById: (id) => api.get(`/smoking/${id}`),
-    logEntry: (data) => api.post('/smoking', data),
-    updateEntry: (id, data) => api.put(`/smoking/${id}`, data),
-    deleteEntry: (id) => api.delete(`/smoking/${id}`),
-    getWeeklyStats: () => api.get('/smoking/stats/weekly'),
-    getMonthlyStats: () => api.get('/smoking/stats/monthly'),
-    getStreakInfo: () => api.get('/smoking/stats/streak'),
+    getAllEntries: () => api.get('/smoking/history/'),
+    getEntryById: (date) => api.get(`/smoking/${date}`),
+    logEntry: (data) => api.post('/smoking/', data),
+    updateEntry: (date, data) => api.put(`/smoking/${date}`, data),
+    deleteEntry: (date) => api.delete(`/smoking/${date}`),
+    getWeeklyStats: () => api.get('/dashboard/'), // Use dashboard endpoint
+    getMonthlyStats: () => api.get('/dashboard/'), // Use dashboard endpoint
+    getStreakInfo: () => api.get('/dashboard/'), // Use dashboard endpoint
 };
 
 // Database Tasks API
