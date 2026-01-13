@@ -1,32 +1,62 @@
 # Growth Tracker
 
-A FastAPI-based backend service for tracking personal growth metrics including health monitoring and database management utilities.
+A complete full-stack application for tracking personal growth metrics including workout sessions and smoking habits. Features a FastAPI backend with PostgreSQL database and a React Native mobile frontend.
 
 ## 🚀 Features
 
+### Backend (FastAPI)
 - ✅ RESTful API with FastAPI
 - ✅ PostgreSQL database with SQLAlchemy ORM
+- ✅ Workout tracker with streak calculations
+- ✅ Smoking tracker with relapse monitoring
+- ✅ Dashboard with comprehensive KPIs
 - ✅ Health check endpoints (app & database)
-- ✅ Database initialization utilities
 - ✅ Comprehensive API documentation
-- ✅ Docker support
+- ✅ Docker support with docker-compose
+- ✅ Environment-based configuration
+- ✅ Automated testing (84% coverage)
 - ✅ CORS enabled
-- 🔄 Smoking tracker (planned)
-- 🔄 Workout tracker (planned)
+
+### Frontend (React Native)
+- ✅ Cross-platform mobile app (iOS, Android, Web)
+- ✅ Material Design UI with React Native Paper
+- ✅ Dashboard with KPIs and charts
+- ✅ Workout logging and tracking
+- ✅ Smoking entry tracking with streaks
+- ✅ Health status monitoring
+- ✅ Pull-to-refresh functionality
+- ✅ Form validation and error handling
+- ✅ Full backend API integration
 
 ## 📋 Prerequisites
 
+### Backend
 - Python 3.8+
 - PostgreSQL 12+
 - pip package manager
 
+### Frontend
+- Node.js 14+
+- npm or yarn
+- Expo CLI (optional, for development)
+
 ## 🛠️ Installation
 
-### 1. Clone the repository
+### Clone the repository
 
 ```bash
 git clone https://github.com/SyamJalla/growth-tracker.git
-cd growth-tracker/Backend
+cd growth-tracker
+```
+
+---
+
+## Backend Setup
+
+### 1. Navigate to Backend directory
+
+```bash
+cd Backend
 ```
 
 ### 2. Create virtual environment
@@ -53,24 +83,107 @@ pip install -r requirements.txt
 
 ### 4. Configure environment
 
-Create a `.env` file in the `Backend` directory:
+Create configuration files in the `Backend` directory:
 
-```env
-APP_NAME=Growth Tracker API
-ENV=dev
-DATABASE_URL=postgresql+psycopg2://postgres:root@localhost:5432/growth_tracker
-ADMIN_DATABASE_URL=postgresql+psycopg2://postgres:root@localhost:5432/postgres
-CORS_ORIGINS=["*"]
+**config.ini:**
+```ini
+[database]
+user = postgres
+password = root
+host = localhost
+port = 5432
+database = growth_tracker
 ```
+
+**Configuration details:** See [Backend/CONFIGURATION.md](Backend/CONFIGURATION.md)
 
 ### 5. Start the server
 
 ```bash
-cd Backend
 uvicorn app:app --reload --host 0.0.0.0 --port 8000
 ```
 
 The API will be available at: **http://localhost:8000**
+
+---
+
+## Frontend Setup
+
+### 1. Navigate to Frontend directory
+
+```bash
+cd Frontend
+```
+
+### 2. Install dependencies
+
+```bash
+npm install
+```
+
+### 3. Configure API URL
+
+Edit `src/services/config.js` and set the appropriate API URL:
+
+```javascript
+export const API_CONFIG = {
+  LOCAL: 'http://localhost:8000/api',
+  PRODUCTION: 'https://your-api-url.com/api',
+};
+
+export const CURRENT_ENV = 'LOCAL';
+```
+
+### 4. Start the app
+
+```bash
+npm start
+```
+
+Then choose your platform:
+- Press `i` for iOS Simulator (Mac only)
+- Press `a` for Android Emulator
+- Press `w` for Web Browser
+PI Endpoints
+
+### Health Check
+- `GET /api/health` - Check application health
+- `GET /api/health/db` - Check database connectivity
+
+### Dashboard
+- `GET /api/dashboard/kpis` - Get all KPIs
+- `GET /api/dashboard/weekly-progress` - Get weekly workout progress
+- `GET /api/dashboard/trends` - Get monthly trends
+
+### Workout Tracker
+- `POST /api/workouts` - Log new workout
+- `GET /api/workouts` - Get all workouts
+- `GET /api/workouts/{id}` - Get specific workout
+- `PUT /api/workouts/{id}` - Update workout
+- `DELETE /api/workouts/{id}` - Delete workout
+- `GET /api/workouts/stats/weekly` - Weekly workout stats
+- `GET /api/workouts/stats/monthly` - Monthly workout stats
+
+### Smoking Tracker
+- `POST /api/smoking` - Log smoking entry
+- `GET /api/smoking` - Get all entries
+- `GET /api/smoking/{id}` - Get specific entry
+- `DELETE /api/smoking/{id}` - Delete entry
+- `GET /api/smoking/stats/weekly` - Weekly smoking stats
+- `GET /api/smoking/stats/monthly` - Monthly smoking stats
+- `GET /api/smoking/stats/streak` - Get streak information
+
+### Database Tasks
+- `DELETE /api/db/clear` - Clear all data
+- `GET /api/db/export` - Export data
+- `POST /api/db/import` - Import data
+
+**Full API Documentation:** [Backend/api-docs/](Backend/api-docs/)
+```
+
+The API will be available at: **http://localhost:8000**
+
+**Docker details:** See [Backend/DOCKER.md](Backend/DOCKER.md)
 
 ## 🗄️ Database Setup
 
@@ -114,27 +227,39 @@ Once the server is running, access the interactive API documentation:
 - **Swagger UI:** http://localhost:8000/docs
 - **ReDoc:** http://localhost:8000/redoc
 
-### Comprehensive Documentation
+### � Mobile App Features
 
-Detailed API documentation is available in the `Backend/api-docs/` folder:
+### Dashboard Screen
+- KPI cards (workout streak, smoke-free days, total workouts, average duration)
+- Weekly workout progress chart
+- Monthly trends display
+- Pull-to-refresh
 
-- **Markdown:** `API-Documentation.md`
-- **HTML (Print to PDF):** `API-Documentation.html`
-- **Postman Collection:** `growth-tracker.postman_collection.json`
+### Workout Tracker
+- Log workouts with type, duration, intensity, calories
+- Edit and delete entries
+- Weekly statistics
+- History view
 
-See [Backend/api-docs/README.md](Backend/api-docs/README.md) for more information.
+### Smoking Tracker
+- Log smoking entries with cigarette count
+- Track mood and triggers
+- View current and longest streak
+- Weekly statistics
 
-## 🔗 Available Endpoints
+### Health Status
+### Backend Tests
 
-### Root
-- `GET /` - API status
+Run tests using pytest:
 
-### Health Check
-- `GET /api/health/` - Check application health
-- `GET /api/health/db` - Check database connectivity
+```bash
+cd Backend
+pytest tests/
+```
 
-### Database Management
-- `POST /db/create_database` - Create new database
+**Test Coverage:** 84% (48/52 tests passing)
+
+**Test Results:** See [Backend/tests/TEST_RESULTS.md](Backend/tests/TEST_RESULTS.md)POST /db/create_database` - Create new database
 - `POST /db/create_tables` - Initialize database tables
 
 ## 🐳 Docker Support
@@ -157,32 +282,144 @@ docker run -d \
 ```
 
 ## 🧪 Testing
-
-Run tests using pytest:
-
-```bash
-cd Backend
-pytest tests/
-```
-
-## 📁 Project Structure
-
-```
-growth-tracker/
-├── Backend/
-│   ├── api/              # API route handlers
-│   │   ├── health.py     # Health check endpoints
-│   │   ├── db_tasks.py   # Database utilities
-│   │   ├── smoking_tracker.py
-│   │   └── workout_tracker.py
-│   ├── core/             # Settings and configuration
-│   │   ├── settings.py
-│   │   └── logging_config.py
-│   ├── db/               # Database models and connection
-│   │   ├── database.py
-│   │   ├── models.py
+                          # FastAPI Backend
+│   ├── api/                          # API route handlers
+│   │   ├── dashboard.py              # Dashboard KPIs endpoint
+│   │   ├── workout_tracker.py        # Workout CRUD operations
+│   │   ├── smoking_tracker.py        # Smoking CRUD operations
+│   │   ├── health.py                 # Health check endpoints
+│   │   └── db_tasks.py               # Database utilities
+│   ├── core/                         # Core configuration
+│   │   ├── settings.py               # Settings and config loader
+│   │   └── logging_config.py         # Logging configuration
+│   ├── db/                           # Database layer
+│   │   ├── database.py               # Database connection
+│   │   ├── models.py                 # SQLAlchemy models
 │   │   └── __init__.py
-│   ├── api-docs/         # API documentation
+│   ├── api-docs/                     # API documentation
+│   │   ├── API-Documentation.md      # Markdown docs
+│   │   ├── API-Documentation.html    # HTML docs
+│   │   ├── growth-tracker.postman_collection.json
+│   │   └── README.md
+│   ├── tests/                        # Test suite (pytest)
+│   │   ├── conftest.py               # Test fixtures
+│   │   ├── test_app.py
+│   │   ├── test_dashboard.py
+│   │   ├── test_workout_tracker.py
+│   │   ├── test_smoking_tracker.py
+│   │   ├── test_kpi_calculations.py
+│   │   ├── test_models_db.py
+│   │   ├── README.md
+│   │   └── TEST_RESULTS.md
+│   ├── app.py                        # Main application
+│   ├── config.ini.example            # Example config file
+│   ├── .env.example                  # Example environment file
+│   ├── Dockerfile                    # Docker configuration
+│   ├── docker-compose.yml            # Docker Compose setup
+│   ├── requirements.txt              # Python dependencies
+│   ├── pytest.ini                    # Pytest configuration
+### Backend Configuration
+
+Configuration is managed through `config.ini` and environment variables:
+
+**config.ini:**
+```ini
+[database]
+user = postgres
+password = your_password
+host = localhost
+port = 5432
+database = growth_tracker
+```
+
+**Environment Variables:**
+- `ENV` - Environment (local/dev/prod)
+- `APP_NAME` - Application name
+- `CORS_ORIGINS` - Allowed CORS origins
+
+See [Backend/CONFIGURATION.md](Backend/CONFIGURATION.md) for detailed configuration guide.
+
+### Frontend Configuration
+
+Update API URL in `Frontend/src/services/config.js`:
+
+```✅ Completed Features
+
+- ✅ Workout tracker with full CRUD operations
+- ✅ Smoking tracker with streak calculations
+- ✅ Dashboard with comprehensive KPIs
+- ✅ Backend API with FastAPI + PostgreSQL
+- ✅ React Native mobile frontend
+- ✅ Docker support with docker-compose
+- ✅ Comprehensive API documentation
+- ✅ Automated testing suite (84% coverage)
+- ✅ Material Design UI
+- ✅ Data visualization with charts
+- ✅ Pull-to-refresh functionality
+- ✅ Form validation and error handling
+
+## 🚧 Future Enhancements
+
+### Backend
+- [ ] User authentication and authorization
+- [ ] Multi-year tracking support
+- [ ] Advanced analytics and insights
+- [ ] API rate limiting
+- [ ] WebSocket support for real-time updates
+- [ ] Set up CI/CD pipeline
+
+### Frontend
+- [ ] Offline support with local caching
+- [ ] Push notifications for reminders
+- [ ] Dark mode theme
+- [ ] Advanced charts (bar, pie, trend lines)
+- [ �️ Technology Stack
+
+### Backend
+- **Framework:** FastAPI
+- **Database:** PostgreSQL
+- **ORM:** SQLAlchemy
+- **Testing:** pytest
+- **Deployment:** Docker, docker-compose
+
+### Frontend
+- **Framework:** React Native with Expo
+- **UI Library:** React Native Paper (Material Design)
+- **Navigation:** React Navigation
+- **HTTP Client:** Axios
+- **Charts:** React Native Chart Kit
+- **Storage:** AsyncStorage
+
+## 📞 Support
+
+For support and questions:
+- Open an issue on GitHub
+- Check the [API documentation](Backend/api-docs/)
+- Review the interactive docs at http://localhost:8000/docs
+- Frontend guide: [Frontend/README.md](Frontend/README.md)
+- Backend configuration: [Backend/CONFIGURATION.md](Backend/CONFIGURATION.md)
+- Docker guide: [Backend/DOCKER.md](Backend/DOCKER.md)
+
+---
+
+**Made with ❤️ using FastAPI and React Nativeodal.js
+│   │   │   └── SmokingFormModal.js
+│   │   └── services/
+│   │       ├── api.js                # API client
+│   │       └── config.js             # API configuration
+│   ├── App.js                        # Root component
+│   ├── package.json                  # Node dependencies
+│   ├── app.json                      # Expo configuration
+│   ├── babel.config.js
+│   └── README.md                     # Frontend guide
+│
+├── planning/                         # Project planning
+│   ├── plan.txt                      # Requirements & versions
+│   ├── plan.jpeg                     # Original plan
+│   └── prompt-history.md             # Development history
+│
+├── .gitignore
+└── README.md            ocs/         # API documentation
 │   │   ├── API-Documentation.md
 │   │   ├── API-Documentation.html
 │   │   ├── growth-tracker.postman_collection.json

@@ -1,0 +1,33 @@
+[run]
+# Source code directories to measure coverage for
+source = .
+
+# Omit these files/directories from coverage
+omit =
+    */tests/*
+    */test_*.py
+    */__pycache__/*
+    */venv/*
+    */.venv/*
+    */env/*
+    setup.py
+    */migrations/*
+    */alembic/*
+    */scripts/*
+    db/test_models.py
+
+[report]
+# Set minimum coverage percentage
+precision = 2
+show_missing = True
+skip_covered = False
+
+# Ignore these during report
+exclude_lines =
+    pragma: no cover
+    def __repr__
+    raise AssertionError
+    raise NotImplementedError
+    if __name__ == .__main__.:
+    if TYPE_CHECKING:
+    @abstractmethod

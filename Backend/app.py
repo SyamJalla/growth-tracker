@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 import logging
+import os
 
 from core.settings import Settings
 from core.logging_config import setup_logging
@@ -14,7 +15,9 @@ from api.dashboard import router as dashboard_router
 
 settings = Settings()
 
-setup_logging(settings)
+# Skip logging setup during testing
+if not os.getenv("TESTING"):
+    setup_logging(settings)
 
 app = FastAPI(title=settings.app_name)
 
@@ -40,14 +43,17 @@ def read_root():
 
 @app.on_event("startup")
 def on_startup():
-	logging.getLogger("uvicorn").info("Starting up application")
-	# Initialize DB (creates tables for imported models)
-	init_db()
+	# Skip database initialization during testing
+	if not os.getenv("TESTING"):
+		logging.getLogger("uvicorn").info("Starting up application")
+		# Initialize DB (creates tables for imported models)
+		init_db()
 
 
 @app.on_event("shutdown")
 def on_shutdown():
-	logging.getLogger("uvicorn").info("Shutting down application")
+	if not os.getenv("TESTING"):
+		logging.getLogger("uvicorn").info("Shutting down application")
 
 
 if __name__ == "__main__":
