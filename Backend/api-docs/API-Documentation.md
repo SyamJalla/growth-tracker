@@ -1,8 +1,8 @@
 # Growth Tracker API Documentation
 
-**Version:** 2.2  
+**Version:** 2.3  
 **Base URL:** `http://localhost:8000`  
-**Last Updated:** January 13, 2026 (VERSION 2.2 - Historical Date Support)
+**Last Updated:** January 17, 2026 (VERSION 2.3 - Frontend Bug Fixes & Platform Compatibility)
 
 ---
 
@@ -20,12 +20,13 @@
    - [Database Setup](#database-setup)
 5. [Error Handling](#error-handling)
 6. [Data Models](#data-models)
+7. [Version History](#version-history)
 
 ---
 
 ## Overview
 
-The Growth Tracker API is a FastAPI-based backend service designed to track personal growth metrics. It provides endpoints for health monitoring, database management, and future features for tracking smoking and workout activities.
+The Growth Tracker API is a FastAPI-based backend service designed to track personal growth metrics. It provides endpoints for health monitoring, database management, and features for tracking smoking and workout activities.
 
 ### Features
 
@@ -37,6 +38,7 @@ The Growth Tracker API is a FastAPI-based backend service designed to track pers
 - ✅ Upsert endpoints for seamless historical data entry
 - ✅ RESTful API design
 - ✅ CORS support for cross-origin requests
+- ✅ Web browser compatibility for frontend clients
 
 ### Tech Stack
 
@@ -44,6 +46,7 @@ The Growth Tracker API is a FastAPI-based backend service designed to track pers
 - **Database:** PostgreSQL
 - **ORM:** SQLAlchemy
 - **Server:** Uvicorn
+- **Frontend:** React Native (Web + Mobile)
 
 ---
 
@@ -215,24 +218,42 @@ Returns comprehensive statistics for both workout and smoking tracking.
 ```json
 {
   "workout": {
-    "current_streak": 5,
-    "longest_streak": 10,
-    "total_workout_days": 45,
-    "total_days": 13,
-    "workout_percentage": 34.6,
-    "average_duration": 52.3,
+    "current_streak": 15,
+    "longest_streak": 15,
+    "total_workout_days": 12,
+    "total_days": 17,
+    "workout_percentage": 70.6,
+    "average_duration": 45.5,
     "most_common_type": "Push"
   },
   "smoking": {
     "current_clean_streak": 7,
-    "total_relapses": 3,
     "longest_clean_streak": 12,
+    "total_relapses": 3,
     "total_cigarettes": 15,
     "most_common_location": "Social"
   },
-  "last_updated": "2026-01-13"
+  "last_updated": "2026-01-17"
 }
 ```
+
+**Field Descriptions:**
+
+**Workout Stats:**
+- `current_streak` - Current consecutive workout days
+- `longest_streak` - Best workout streak achieved
+- `total_workout_days` - Total days with workouts logged
+- `total_days` - Total days in tracking period (2026)
+- `workout_percentage` - Percentage of days with workouts
+- `average_duration` - Average workout duration in minutes
+- `most_common_type` - Most frequently performed workout type
+
+**Smoking Stats:**
+- `current_clean_streak` - Current consecutive smoke-free days
+- `longest_clean_streak` - Best clean streak achieved
+- `total_relapses` - Total number of relapse days
+- `total_cigarettes` - Total cigarettes smoked across all entries
+- `most_common_location` - Most common relapse location
 
 **Status Codes:**
 - `200 OK` - Dashboard data retrieved successfully
@@ -245,11 +266,41 @@ curl -X GET http://localhost:8000/api/dashboard/
 
 **Use Case:** Primary endpoint for mobile dashboard screen. Returns all calculated KPIs for calendar year 2026.
 
+**Version 2.3 Notes:**
+- ✅ Field names corrected (January 17, 2026)
+- ✅ `total_workout_days` replaces `total_workouts`
+- ✅ `average_duration` replaces `avg_duration`
+- ✅ `current_clean_streak` replaces `current_streak` in smoking stats
+- ✅ `longest_clean_streak` replaces `longest_streak` in smoking stats
+- Frontend synchronized to match these field names
+
 ---
 
 ### Workout Tracker
 
 Endpoints for managing workout entries. Supports full CRUD operations plus smart upsert functionality.
+
+#### Workout Types (Enum)
+
+Valid workout types (updated in v2.3):
+
+- `Push` - Push exercises (chest, shoulders, triceps)
+- `Pull` - Pull exercises (back, biceps)
+- `Legs` - Leg exercises (squats, lunges, etc.)
+- `Upper` - Upper body mixed
+- `Lower` - Lower body mixed
+- `Cardio` - Cardiovascular exercises
+- `Others` - Other workout types
+
+#### Intensity Levels (Enum)
+
+Valid intensity levels (updated in v2.3):
+
+- `Low` - Light effort
+- `Moderate` - Medium effort (previously "Medium")
+- `High` - Maximum effort
+
+---
 
 #### 1. Create Workout Entry
 
@@ -261,12 +312,12 @@ Creates a new workout entry for a specific date. Returns error if entry already 
 
 ```json
 {
-  "date": "2026-01-13",
+  "date": "2026-01-17",
   "workout_type": "Push",
   "workout_done": true,
   "duration_minutes": 45,
   "intensity": "High",
-  "notes": "Great session"
+  "notes": "Great chest session"
 }
 ```
 
@@ -274,14 +325,14 @@ Creates a new workout entry for a specific date. Returns error if entry already 
 
 ```json
 {
-  "date": "2026-01-13",
+  "date": "2026-01-17",
   "workout_type": "Push",
   "workout_done": true,
   "duration_minutes": 45,
   "intensity": "High",
-  "notes": "Great session",
-  "created_at": "2026-01-13T10:30:00",
-  "updated_at": "2026-01-13T10:30:00"
+  "notes": "Great chest session",
+  "created_at": "2026-01-17T10:30:00",
+  "updated_at": "2026-01-17T10:30:00"
 }
 ```
 
@@ -291,7 +342,7 @@ Creates a new workout entry for a specific date. Returns error if entry already 
 
 ---
 
-#### 2. Upsert Workout Entry (NEW in v2.2) ⭐
+#### 2. Upsert Workout Entry (Recommended) ⭐
 
 Creates or updates workout entry for a specific date. Smart endpoint that automatically handles both create and update operations.
 
@@ -321,7 +372,7 @@ Creates or updates workout entry for a specific date. Smart endpoint that automa
   "intensity": "Moderate",
   "notes": "Back and biceps",
   "created_at": "2026-01-05T09:00:00",
-  "updated_at": "2026-01-13T11:00:00"
+  "updated_at": "2026-01-17T11:00:00"
 }
 ```
 
@@ -333,6 +384,7 @@ Creates or updates workout entry for a specific date. Smart endpoint that automa
 - ✅ Single API call for all operations
 - ✅ Ideal for historical date entry
 - ✅ Idempotent (safe to retry)
+- ✅ Used by web and mobile clients
 
 ---
 
@@ -349,14 +401,14 @@ Retrieves workout entry for a specific date.
 
 ```json
 {
-  "date": "2026-01-13",
+  "date": "2026-01-17",
   "workout_type": "Push",
   "workout_done": true,
   "duration_minutes": 45,
   "intensity": "High",
   "notes": "Great session",
-  "created_at": "2026-01-13T10:30:00",
-  "updated_at": "2026-01-13T10:30:00"
+  "created_at": "2026-01-17T10:30:00",
+  "updated_at": "2026-01-17T10:30:00"
 }
 ```
 
@@ -389,14 +441,14 @@ Updates existing workout entry for a specific date.
 
 ```json
 {
-  "date": "2026-01-13",
+  "date": "2026-01-17",
   "workout_type": "Legs",
   "workout_done": true,
   "duration_minutes": 50,
   "intensity": "High",
   "notes": "Great session",
-  "created_at": "2026-01-13T10:30:00",
-  "updated_at": "2026-01-13T15:00:00"
+  "created_at": "2026-01-17T10:30:00",
+  "updated_at": "2026-01-17T15:00:00"
 }
 ```
 
@@ -438,24 +490,24 @@ Retrieves list of all workout entries with optional date filtering.
 ```json
 [
   {
-    "date": "2026-01-13",
+    "date": "2026-01-17",
     "workout_type": "Push",
     "workout_done": true,
     "duration_minutes": 45,
     "intensity": "High",
     "notes": "Great session",
-    "created_at": "2026-01-13T10:30:00",
-    "updated_at": "2026-01-13T10:30:00"
+    "created_at": "2026-01-17T10:30:00",
+    "updated_at": "2026-01-17T10:30:00"
   },
   {
-    "date": "2026-01-12",
+    "date": "2026-01-16",
     "workout_type": "Pull",
     "workout_done": true,
     "duration_minutes": 50,
     "intensity": "Moderate",
     "notes": null,
-    "created_at": "2026-01-12T09:00:00",
-    "updated_at": "2026-01-12T09:00:00"
+    "created_at": "2026-01-16T09:00:00",
+    "updated_at": "2026-01-16T09:00:00"
   }
 ]
 ```
@@ -478,6 +530,17 @@ curl -X GET "http://localhost:8000/api/workouts/history/?start_date=2026-01-01&e
 ### Smoking Tracker
 
 Endpoints for managing smoking entries. Each entry represents a relapse day.
+
+#### Location Types (Enum)
+
+Valid locations:
+
+- `Home` - At home
+- `Work` - At workplace
+- `Social` - Social gatherings
+- `Other` - Other locations
+
+---
 
 #### 1. Create Smoking Entry
 
@@ -514,7 +577,7 @@ Creates a new smoking entry for a specific date. Returns error if entry already 
 
 ---
 
-#### 2. Upsert Smoking Entry (NEW in v2.2) ⭐
+#### 2. Upsert Smoking Entry (Recommended) ⭐
 
 Creates or updates smoking entry for a specific date. Recommended for all data entry operations.
 
@@ -764,8 +827,10 @@ The API follows standard HTTP status codes and returns errors in a consistent fo
 | Code | Description | When It Occurs |
 |------|-------------|----------------|
 | 200 | OK | Request succeeded |
-| 400 | Bad Request | Invalid request parameters |
-| 404 | Not Found | Endpoint doesn't exist |
+| 201 | Created | Resource created successfully |
+| 204 | No Content | Resource deleted successfully |
+| 400 | Bad Request | Invalid request parameters or duplicate entry |
+| 404 | Not Found | Resource or endpoint doesn't exist |
 | 422 | Unprocessable Entity | Request validation failed |
 | 500 | Internal Server Error | Server-side error occurred |
 | 503 | Service Unavailable | Database or service unreachable |
@@ -778,11 +843,19 @@ The API follows standard HTTP status codes and returns errors in a consistent fo
 {
   "detail": [
     {
-      "loc": ["body", "db_name"],
-      "msg": "field required",
-      "type": "value_error.missing"
+      "loc": ["body", "workout_type"],
+      "msg": "value is not a valid enumeration member; permitted: 'Push', 'Pull', 'Legs', 'Upper', 'Lower', 'Cardio', 'Others'",
+      "type": "type_error.enum"
     }
   ]
+}
+```
+
+**Duplicate Entry (400):**
+
+```json
+{
+  "detail": "Entry already exists for 2026-01-17"
 }
 ```
 
@@ -794,61 +867,199 @@ The API follows standard HTTP status codes and returns errors in a consistent fo
 }
 ```
 
-**Internal Server Error (500):**
-
-```json
-{
-  "detail": "FATAL: database \"growth_tracker\" does not exist"
-}
-```
-
 ---
 
 ## Data Models
 
-### CreateDatabaseRequest
+### Dashboard Response
 
-Used for creating a new database.
-
-```python
+```typescript
 {
-  "db_name": "string"  # Required, default: "growth_tracker"
+  workout: {
+    current_streak: number,        // Current workout streak (days)
+    longest_streak: number,        // Best workout streak
+    total_workout_days: number,    // Total days with workouts
+    total_days: number,            // Total tracking days
+    workout_percentage: number,    // Workout adherence %
+    average_duration: number,      // Avg workout duration (min)
+    most_common_type: string       // Most frequent workout type
+  },
+  smoking: {
+    current_clean_streak: number,  // Current smoke-free days
+    longest_clean_streak: number,  // Best clean streak
+    total_relapses: number,        // Total relapse days
+    total_cigarettes: number,      // Total cigarettes smoked
+    most_common_location: string   // Most common relapse location
+  },
+  last_updated: string             // ISO date string
 }
 ```
 
-**Example:**
+### Workout Entry
 
-```json
+```typescript
 {
-  "db_name": "growth_tracker"
+  date: string,                    // YYYY-MM-DD format (primary key)
+  workout_type: WorkoutType,       // Push | Pull | Legs | Upper | Lower | Cardio | Others
+  workout_done: boolean,           // Whether workout was completed
+  duration_minutes: number,        // Workout duration
+  intensity?: IntensityLevel,      // Low | Moderate | High (optional)
+  notes?: string,                  // Optional notes (optional)
+  created_at: string,              // ISO timestamp
+  updated_at: string               // ISO timestamp
 }
 ```
+
+### Smoking Entry
+
+```typescript
+{
+  date: string,                    // YYYY-MM-DD format (primary key)
+  cigarette_count: number,         // Number of cigarettes (min: 1)
+  location?: Location,             // Home | Work | Social | Other (optional)
+  remarks?: string,                // Optional notes (optional)
+  created_at: string               // ISO timestamp
+}
+```
+
+### Date Format Notes
+
+**Backend:**
+- All dates stored as DATE type (no time component)
+- Format: `YYYY-MM-DD` (ISO 8601)
+- Example: `"2026-01-17"`
+- Date is the primary key for entries
+
+**Frontend Handling (v2.3):**
+- Web: Uses HTML5 `<input type="date">`
+- Mobile: Uses native DateTimePicker component
+- Parsing: Always append `T00:00:00` to prevent timezone issues
+- Example: `new Date("2026-01-17T00:00:00")`
+- This ensures correct date display regardless of user timezone
 
 ---
 
-### Future Models
+## Version History
 
-The following models are defined but not yet used in active endpoints:
+### Version 2.3 (January 17, 2026) - Frontend Bug Fixes
 
-#### SmokingEntry
+**Fixed:**
+- ✅ Dashboard field name corrections
+  - `total_workouts` → `total_workout_days`
+  - `avg_duration` → `average_duration`
+  - `current_streak` → `current_clean_streak` (smoking)
+  - `longest_streak` → `longest_clean_streak` (smoking)
+- ✅ Workout type enum synchronized
+  - Updated to: Push, Pull, Legs, Upper, Lower, Cardio, Others
+- ✅ Intensity level correction
+  - Changed: Medium → Moderate
+- ✅ Date handling improvements
+  - Added timezone normalization (T00:00:00)
+  - Platform-specific date pickers (web vs mobile)
+- ✅ Web browser compatibility
+  - HTML5 date input for web clients
+  - Native pickers for iOS/Android
 
-```python
-{
-  "date": "string",           # Required, format: YYYY-MM-DD
-  "cigarettes": "integer",    # Required
-  "notes": "string"           # Optional
-}
+**Frontend Changes:**
+- 8 files modified
+- ~380 lines changed
+- Platform detection added (web vs mobile)
+- Date formatting standardized
+- Color scheme improved
+
+**Documentation:**
+- API docs updated with correct field names
+- Enum values documented
+- Platform-specific notes added
+- Date handling best practices included
+
+---
+
+### Version 2.2 (January 13, 2026) - Historical Date Support
+
+**Added:**
+- ✅ Upsert endpoints for both workout and smoking
+- ✅ Dashboard endpoint with comprehensive KPIs
+- ✅ Streak calculation logic
+- ✅ Historical date entry support
+- ✅ Most common workout type tracking
+- ✅ Location-based smoking statistics
+
+**Improved:**
+- Better error messages
+- Idempotent operations
+- Clean streak recalculation
+
+---
+
+### Version 2.0 (January 13, 2026) - Full CRUD Implementation
+
+**Added:**
+- ✅ Complete workout tracker endpoints
+- ✅ Complete smoking tracker endpoints
+- ✅ Date-based primary keys
+- ✅ Enum validation for types and intensity
+- ✅ Comprehensive test coverage (84%)
+
+---
+
+### Version 1.0 (January 13, 2026) - Initial Release
+
+**Added:**
+- ✅ Root endpoint
+- ✅ Health check endpoints
+- ✅ Database setup utilities
+- ✅ Basic API structure
+
+---
+
+## Frontend Integration Notes
+
+### React Native Client
+
+**Web Browser:**
+- Uses HTML5 `<input type="date">` for date selection
+- Detects platform via `Platform.OS === 'web'`
+- Date stored as string (YYYY-MM-DD)
+
+**Mobile (iOS/Android):**
+- Uses `@react-native-community/datetimepicker`
+- Native date picker UI
+- Date stored as Date object, converted to string for API
+
+**Date Handling Best Practice:**
+```javascript
+// Parsing date from API
+const date = new Date(apiDate + 'T00:00:00'); // Timezone safe
+
+// Formatting for API
+const formatDate = (date) => {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+};
 ```
 
-#### WorkoutEntry
+**Field Mapping Reference:**
+```javascript
+// Dashboard
+dashboardResponse.data.workout.current_streak ✅
+dashboardResponse.data.workout.total_workout_days ✅
+dashboardResponse.data.workout.average_duration ✅
+dashboardResponse.data.smoking.current_clean_streak ✅
+dashboardResponse.data.smoking.longest_clean_streak ✅
 
-```python
-{
-  "date": "string",           # Required, format: YYYY-MM-DD
-  "activity": "string",       # Required (e.g., "Running", "Gym")
-  "duration_minutes": "integer",  # Required
-  "notes": "string"           # Optional
-}
+// Workout Entry
+entry.date ✅
+entry.workout_type ✅
+entry.duration_minutes ✅
+entry.intensity ✅
+
+// Smoking Entry
+entry.date ✅
+entry.cigarette_count ✅
+entry.location ✅
 ```
 
 ---
@@ -899,10 +1110,14 @@ FastAPI provides interactive API documentation:
 ```
 Backend/
 ├── api/              # API route handlers
+│   ├── dashboard.py  # Dashboard KPIs
+│   ├── workout.py    # Workout CRUD
+│   ├── smoking.py    # Smoking CRUD
+│   └── health.py     # Health checks
 ├── core/             # Settings and configuration
 ├── db/               # Database models and connection
-├── api-docs/         # API documentation and Postman collection
-├── tests/            # Test files
+├── api-docs/         # API documentation (this file)
+├── tests/            # Test files (84% coverage)
 ├── app.py            # Main application entry point
 └── requirements.txt  # Python dependencies
 ```
@@ -913,38 +1128,21 @@ Backend/
 
 For issues, questions, or contributions:
 
+- **Interactive Docs:** http://localhost:8000/docs
 - **GitHub Issues:** [Create an issue]
 - **Email:** support@example.com
-- **Documentation:** This file
-
----
-
-## Changelog
-
-### Version 1.0.0 (January 13, 2026)
-
-**Added:**
-- Root endpoint for basic status
-- Health check endpoints (app and database)
-- Database creation endpoint
-- Table creation endpoint
-- API documentation
-
-**Removed:**
-- S3 service integration
-- Alembic migration support
-
-**Planned:**
-- Smoking tracker endpoints
-- Workout tracker endpoints
-- Authentication and authorization
-- User management
 
 ---
 
 ## License
 
 [Add your license information here]
+
+---
+
+*Last Updated: January 17, 2026*  
+*Version: 2.3*  
+*API Status: Production Ready*
 
 ---
 

@@ -1,56 +1,49 @@
-
 {
   "info": {
-    "name": "Growth Tracker API",
-    "_postman_id": "growth-tracker-collection",
-    "description": "# Growth Tracker API\n\nA FastAPI-based backend for tracking personal growth metrics including smoking and workout activities.\n\n## Features\n- Health check endpoints\n- Database management utilities\n- Smoking tracker (placeholder)\n- Workout tracker (placeholder)\n\n## Setup\n1. Ensure PostgreSQL is running\n2. Configure environment variables or use defaults\n3. Create database using `/db/create_database`\n4. Initialize tables using `/db/create_tables`\n\n## Variables\n- `protocol`: http or https (default: http)\n- `host`: server hostname (default: localhost)\n- `port`: server port (default: 8000)",
+    "name": "Growth Tracker API v2.3",
+    "_postman_id": "growth-tracker-v2-3",
+    "description": "Complete API collection for Growth Tracker - VERSION 2.3 (January 17, 2026)\n\nFrontend Bug Fixes & Platform Compatibility Update\n\nChanges in v2.3:\n- Dashboard field names corrected\n- Workout type enum synchronized\n- Intensity levels updated (Medium → Moderate)\n- Date handling improvements\n- Web browser compatibility",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
-  "variable": [
-    { "key": "protocol", "value": "http", "type": "string" },
-    { "key": "host", "value": "localhost", "type": "string" },
-    { "key": "port", "value": "8000", "type": "string" }
-  ],
   "item": [
     {
-      "name": "Root",
-      "description": "Basic API root endpoint to verify the service is running",
+      "name": "Health Check",
       "item": [
         {
-          "name": "GET /",
+          "name": "Get API Status",
           "request": {
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{protocol}}://{{host}}:{{port}}/",
-              "protocol": "{{protocol}}",
-              "host": ["{{host}}"],
-              "port": "{{port}}",
-              "path": [""]
+              "raw": "{{base_url}}/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                ""
+              ]
             },
-            "description": "Returns basic status information about the Growth Tracker API.\n\n**Expected Response:**\n```json\n{\n  \"status\": \"ok\",\n  \"message\": \"Growth Tracker API\"\n}\n```"
+            "description": "Returns basic information about the API to verify it's running."
           },
           "response": []
-        }
-      ]
-    },
-    {
-      "name": "Health",
-      "description": "Health check endpoints to monitor application and database status",
-      "item": [
+        },
         {
-          "name": "Check API Health",
+          "name": "Check Application Health",
           "request": {
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{protocol}}://{{host}}:{{port}}/api/health/",
-              "protocol": "{{protocol}}",
-              "host": ["{{host}}"],
-              "port": "{{port}}",
-              "path": ["api", "health", ""]
+              "raw": "{{base_url}}/api/health/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "health",
+                ""
+              ]
             },
-            "description": "Verifies that the API is running and responsive.\n\n**Expected Response (200 OK):**\n```json\n{\n  \"status\": \"ok\",\n  \"message\": \"Growth Tracker API running\"\n}\n```"
+            "description": "Verifies that the API application is running and responsive."
           },
           "response": []
         },
@@ -60,13 +53,17 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{protocol}}://{{host}}:{{port}}/api/health/db",
-              "protocol": "{{protocol}}",
-              "host": ["{{host}}"],
-              "port": "{{port}}",
-              "path": ["api", "health", "db"]
+              "raw": "{{base_url}}/api/health/db",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "health",
+                "db"
+              ]
             },
-            "description": "Verifies database connectivity by executing a simple query.\n\n**Expected Response (200 OK):**\n```json\n{\n  \"status\": \"ok\",\n  \"db\": \"ok\"\n}\n```\n\n**Error Response (503 Service Unavailable):**\n```json\n{\n  \"detail\": \"Database unreachable\"\n}\n```"
+            "description": "Verifies database connectivity by executing a lightweight query."
           },
           "response": []
         }
@@ -74,27 +71,32 @@
     },
     {
       "name": "Database Setup",
-      "description": "Utility endpoints for database initialization. Run these in order during first-time setup.",
       "item": [
         {
           "name": "Create Database",
           "request": {
             "method": "POST",
             "header": [
-              { "key": "Content-Type", "value": "application/json" }
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
             ],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"db_name\": \"growth_tracker\"\n}"
             },
             "url": {
-              "raw": "{{protocol}}://{{host}}:{{port}}/db/create_database",
-              "protocol": "{{protocol}}",
-              "host": ["{{host}}"],
-              "port": "{{port}}",
-              "path": ["db", "create_database"]
+              "raw": "{{base_url}}/db/create_database",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "db",
+                "create_database"
+              ]
             },
-            "description": "Creates a new PostgreSQL database on the server.\n\n**Note:** This endpoint connects to the admin database (typically 'postgres') to create the new database. Configure `admin_database_url` in settings.\n\n**Request Body:**\n```json\n{\n  \"db_name\": \"growth_tracker\"\n}\n```\n\n**Success Response (200 OK):**\n```json\n{\n  \"status\": \"ok\",\n  \"detail\": \"database 'growth_tracker' created\"\n}\n```\n\n**If Already Exists:**\n```json\n{\n  \"status\": \"ok\",\n  \"detail\": \"database 'growth_tracker' already exists\"\n}\n```\n\n**Error Response (500):**\n```json\n{\n  \"detail\": \"<error message>\"\n}\n```"
+            "description": "Creates a new PostgreSQL database. Idempotent - safe to call multiple times."
           },
           "response": []
         },
@@ -104,17 +106,538 @@
             "method": "POST",
             "header": [],
             "url": {
-              "raw": "{{protocol}}://{{host}}:{{port}}/db/create_tables",
-              "protocol": "{{protocol}}",
-              "host": ["{{host}}"],
-              "port": "{{port}}",
-              "path": ["db", "create_tables"]
+              "raw": "{{base_url}}/db/create_tables",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "db",
+                "create_tables"
+              ]
             },
-            "description": "Creates all database tables defined in SQLAlchemy models.\n\n**Note:** This uses SQLAlchemy's `create_all()` which is idempotent - it will not recreate existing tables.\n\n**Success Response (200 OK):**\n```json\n{\n  \"status\": \"ok\",\n  \"detail\": \"tables created or already exist\"\n}\n```\n\n**Error Response (500):**\n```json\n{\n  \"detail\": \"<error message>\"\n}\n```"
+            "description": "Creates all database tables defined in SQLAlchemy models. Idempotent."
           },
           "response": []
         }
       ]
+    },
+    {
+      "name": "Dashboard",
+      "item": [
+        {
+          "name": "Get Dashboard Data",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/dashboard/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "dashboard",
+                ""
+              ]
+            },
+            "description": "Returns comprehensive statistics for both workout and smoking tracking.\n\nVERSION 2.3 UPDATES:\n- Field names corrected\n- total_workout_days (not total_workouts)\n- average_duration (not avg_duration)\n- current_clean_streak (not current_streak)\n- longest_clean_streak (not longest_streak)"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Workout Tracker",
+      "item": [
+        {
+          "name": "Create Workout Entry",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"date\": \"{{test_date}}\",\n  \"workout_type\": \"Push\",\n  \"workout_done\": true,\n  \"duration_minutes\": 45,\n  \"intensity\": \"High\",\n  \"notes\": \"Great chest and triceps session\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/workouts/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "workouts",
+                ""
+              ]
+            },
+            "description": "Creates a new workout entry. Returns error if entry already exists.\n\nWorkout Types: Push, Pull, Legs, Upper, Lower, Cardio, Others\nIntensity Levels: Low, Moderate, High"
+          },
+          "response": []
+        },
+        {
+          "name": "Upsert Workout Entry (Recommended)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"date\": \"2026-01-05\",\n  \"workout_type\": \"Pull\",\n  \"workout_done\": true,\n  \"duration_minutes\": 60,\n  \"intensity\": \"Moderate\",\n  \"notes\": \"Back and biceps workout\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/workouts/upsert/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "workouts",
+                "upsert",
+                ""
+              ]
+            },
+            "description": "Creates or updates workout entry. Recommended for all data entry.\n\nBenefits:\n- No duplicate entry errors\n- Single API call for all operations\n- Ideal for historical date entry\n- Idempotent (safe to retry)"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Workout Entry",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/workouts/{{test_date}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "workouts",
+                "{{test_date}}"
+              ]
+            },
+            "description": "Retrieves workout entry for a specific date."
+          },
+          "response": []
+        },
+        {
+          "name": "Update Workout Entry",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"workout_type\": \"Legs\",\n  \"duration_minutes\": 50,\n  \"intensity\": \"High\",\n  \"notes\": \"Updated to legs workout\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/workouts/{{test_date}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "workouts",
+                "{{test_date}}"
+              ]
+            },
+            "description": "Updates existing workout entry. All fields are optional."
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Workout Entry",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/workouts/{{test_date}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "workouts",
+                "{{test_date}}"
+              ]
+            },
+            "description": "Deletes workout entry for a specific date."
+          },
+          "response": []
+        },
+        {
+          "name": "Get Workout History",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/workouts/history/?start_date=2026-01-01&end_date=2026-01-31",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "workouts",
+                "history",
+                ""
+              ],
+              "query": [
+                {
+                  "key": "start_date",
+                  "value": "2026-01-01",
+                  "description": "Filter from this date (optional)"
+                },
+                {
+                  "key": "end_date",
+                  "value": "2026-01-31",
+                  "description": "Filter until this date (optional)"
+                }
+              ]
+            },
+            "description": "Retrieves list of all workout entries with optional date filtering."
+          },
+          "response": []
+        },
+        {
+          "name": "Example - Push Workout",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"date\": \"2026-01-18\",\n  \"workout_type\": \"Push\",\n  \"workout_done\": true,\n  \"duration_minutes\": 45,\n  \"intensity\": \"High\",\n  \"notes\": \"Chest, shoulders, triceps\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/workouts/upsert/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "workouts",
+                "upsert",
+                ""
+              ]
+            },
+            "description": "Example: Push workout (chest, shoulders, triceps)"
+          },
+          "response": []
+        },
+        {
+          "name": "Example - Pull Workout",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"date\": \"2026-01-19\",\n  \"workout_type\": \"Pull\",\n  \"workout_done\": true,\n  \"duration_minutes\": 50,\n  \"intensity\": \"Moderate\",\n  \"notes\": \"Back and biceps\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/workouts/upsert/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "workouts",
+                "upsert",
+                ""
+              ]
+            },
+            "description": "Example: Pull workout (back, biceps)"
+          },
+          "response": []
+        },
+        {
+          "name": "Example - Legs Workout",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"date\": \"2026-01-20\",\n  \"workout_type\": \"Legs\",\n  \"workout_done\": true,\n  \"duration_minutes\": 60,\n  \"intensity\": \"High\",\n  \"notes\": \"Squats, lunges, leg press\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/workouts/upsert/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "workouts",
+                "upsert",
+                ""
+              ]
+            },
+            "description": "Example: Legs workout"
+          },
+          "response": []
+        },
+        {
+          "name": "Example - Cardio Workout",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"date\": \"2026-01-21\",\n  \"workout_type\": \"Cardio\",\n  \"workout_done\": true,\n  \"duration_minutes\": 30,\n  \"intensity\": \"Moderate\",\n  \"notes\": \"Running and cycling\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/workouts/upsert/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "workouts",
+                "upsert",
+                ""
+              ]
+            },
+            "description": "Example: Cardio workout"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Smoking Tracker",
+      "item": [
+        {
+          "name": "Create Smoking Entry",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"date\": \"2026-01-10\",\n  \"cigarette_count\": 3,\n  \"location\": \"Social\",\n  \"remarks\": \"Party with friends\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/smoking/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "smoking",
+                ""
+              ]
+            },
+            "description": "Creates a new smoking entry. Returns error if entry already exists.\n\nLocation Types: Home, Work, Social, Other"
+          },
+          "response": []
+        },
+        {
+          "name": "Upsert Smoking Entry (Recommended)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"date\": \"2026-01-10\",\n  \"cigarette_count\": 5,\n  \"location\": \"Work\",\n  \"remarks\": \"Stressful day\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/smoking/upsert/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "smoking",
+                "upsert",
+                ""
+              ]
+            },
+            "description": "Creates or updates smoking entry. Recommended for all data entry.\n\nBenefits:\n- No duplicate entry errors\n- Single API call for all operations\n- Ideal for historical date entry\n- Clean streak recalculates automatically"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Smoking Entry",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/smoking/2026-01-10",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "smoking",
+                "2026-01-10"
+              ]
+            },
+            "description": "Retrieves smoking entry for a specific date."
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Smoking Entry",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/smoking/2026-01-10",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "smoking",
+                "2026-01-10"
+              ]
+            },
+            "description": "Deletes smoking entry for a specific date."
+          },
+          "response": []
+        },
+        {
+          "name": "Get Smoking History",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/smoking/history/?start_date=2026-01-01&end_date=2026-01-31",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "smoking",
+                "history",
+                ""
+              ],
+              "query": [
+                {
+                  "key": "start_date",
+                  "value": "2026-01-01",
+                  "description": "Filter from this date (optional)"
+                },
+                {
+                  "key": "end_date",
+                  "value": "2026-01-31",
+                  "description": "Filter until this date (optional)"
+                }
+              ]
+            },
+            "description": "Retrieves list of all smoking entries with optional date filtering."
+          },
+          "response": []
+        },
+        {
+          "name": "Example - Home Location",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"date\": \"2026-01-15\",\n  \"cigarette_count\": 2,\n  \"location\": \"Home\",\n  \"remarks\": \"Relaxing at home\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/smoking/upsert/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "smoking",
+                "upsert",
+                ""
+              ]
+            },
+            "description": "Example: Smoking entry at home"
+          },
+          "response": []
+        },
+        {
+          "name": "Example - Work Location",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"date\": \"2026-01-16\",\n  \"cigarette_count\": 4,\n  \"location\": \"Work\",\n  \"remarks\": \"Stressful work day\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/smoking/upsert/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "smoking",
+                "upsert",
+                ""
+              ]
+            },
+            "description": "Example: Smoking entry at work"
+          },
+          "response": []
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:8000"
+    },
+    {
+      "key": "test_date",
+      "value": "2026-01-17"
     }
   ]
 }

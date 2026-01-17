@@ -1,78 +1,107 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Growth Tracker API Documentation</title>
+    <title>Growth Tracker API Documentation v2.3</title>
     <style>
-        @media print {
-            body { margin: 0; }
-            .page-break { page-break-before: always; }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
-        
-        * { box-sizing: border-box; }
-        
+
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
             line-height: 1.6;
             color: #333;
             max-width: 1200px;
             margin: 0 auto;
-            padding: 40px 20px;
-            background: #f9f9f9;
+            padding: 20px;
+            background: #f5f5f5;
         }
-        
+
         .container {
             background: white;
-            padding: 60px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            padding: 40px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
-        
+
         h1 {
             color: #2c3e50;
-            border-bottom: 4px solid #3498db;
-            padding-bottom: 15px;
+            border-bottom: 3px solid #3498db;
+            padding-bottom: 10px;
             margin-bottom: 30px;
             font-size: 2.5em;
         }
-        
+
         h2 {
             color: #2c3e50;
             margin-top: 40px;
             margin-bottom: 20px;
-            font-size: 1.8em;
+            font-size: 2em;
             border-bottom: 2px solid #ecf0f1;
             padding-bottom: 10px;
         }
-        
+
         h3 {
             color: #34495e;
             margin-top: 30px;
             margin-bottom: 15px;
-            font-size: 1.3em;
+            font-size: 1.5em;
         }
-        
+
         h4 {
-            color: #555;
+            color: #34495e;
             margin-top: 20px;
             margin-bottom: 10px;
+            font-size: 1.2em;
         }
-        
-        .badge {
-            display: inline-block;
-            padding: 4px 12px;
-            border-radius: 4px;
-            font-size: 0.85em;
-            font-weight: 600;
-            margin-right: 10px;
-            color: white;
+
+        .metadata {
+            background: #ecf0f1;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 30px;
         }
-        
-        .badge.get { background: #27ae60; }
-        .badge.post { background: #3498db; }
-        .badge.put { background: #f39c12; }
-        .badge.delete { background: #e74c3c; }
-        
+
+        .metadata p {
+            margin: 5px 0;
+        }
+
+        .metadata strong {
+            color: #2c3e50;
+        }
+
+        code {
+            background: #f8f9fa;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+            color: #e74c3c;
+            font-size: 0.9em;
+        }
+
+        pre {
+            background: #2c3e50;
+            color: #ecf0f1;
+            padding: 20px;
+            border-radius: 5px;
+            overflow-x: auto;
+            margin: 15px 0;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+            line-height: 1.4;
+        }
+
+        pre code {
+            background: none;
+            color: #ecf0f1;
+            padding: 0;
+        }
+
         .endpoint {
             background: #f8f9fa;
             border-left: 4px solid #3498db;
@@ -80,73 +109,88 @@
             margin: 20px 0;
             border-radius: 4px;
         }
-        
-        .endpoint-header {
-            font-size: 1.1em;
-            margin-bottom: 15px;
-        }
-        
-        .endpoint-url {
-            font-family: 'Courier New', monospace;
-            background: #2c3e50;
-            color: #ecf0f1;
-            padding: 12px 15px;
-            border-radius: 4px;
-            margin: 10px 0;
-            font-size: 0.95em;
-            overflow-x: auto;
-        }
-        
-        pre {
-            background: #282c34;
-            color: #abb2bf;
-            padding: 20px;
-            border-radius: 6px;
-            overflow-x: auto;
-            margin: 15px 0;
-            font-size: 0.9em;
-            line-height: 1.5;
-        }
-        
-        code {
-            font-family: 'Courier New', monospace;
-            background: #f4f4f4;
-            padding: 2px 6px;
+
+        .method {
+            display: inline-block;
+            padding: 4px 12px;
             border-radius: 3px;
+            font-weight: bold;
+            margin-right: 10px;
             font-size: 0.9em;
-            color: #e74c3c;
         }
-        
-        pre code {
-            background: transparent;
-            color: inherit;
-            padding: 0;
+
+        .method.get {
+            background: #27ae60;
+            color: white;
         }
-        
+
+        .method.post {
+            background: #3498db;
+            color: white;
+        }
+
+        .method.put {
+            background: #f39c12;
+            color: white;
+        }
+
+        .method.delete {
+            background: #e74c3c;
+            color: white;
+        }
+
+        .status-code {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 3px;
+            font-family: monospace;
+            font-size: 0.9em;
+            margin-right: 10px;
+        }
+
+        .status-code.success {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status-code.error {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
         table {
             width: 100%;
             border-collapse: collapse;
             margin: 20px 0;
             background: white;
         }
-        
-        table th {
-            background: #34495e;
-            color: white;
+
+        th,
+        td {
             padding: 12px;
             text-align: left;
-            font-weight: 600;
+            border-bottom: 1px solid #ddd;
         }
-        
-        table td {
-            padding: 12px;
-            border-bottom: 1px solid #ecf0f1;
+
+        th {
+            background: #3498db;
+            color: white;
+            font-weight: bold;
         }
-        
-        table tr:hover {
+
+        tr:hover {
             background: #f8f9fa;
         }
-        
+
+        ul {
+            margin: 15px 0;
+            padding-left: 30px;
+        }
+
+        li {
+            margin: 8px 0;
+        }
+
         .note {
             background: #fff3cd;
             border-left: 4px solid #ffc107;
@@ -154,99 +198,128 @@
             margin: 20px 0;
             border-radius: 4px;
         }
-        
-        .note strong {
-            color: #856404;
-        }
-        
-        .success {
-            background: #d4edda;
-            border-left: 4px solid #28a745;
-            padding: 15px;
-            margin: 15px 0;
-            border-radius: 4px;
-        }
-        
-        .error {
+
+        .warning {
             background: #f8d7da;
             border-left: 4px solid #dc3545;
-            padding: 15px;
-            margin: 15px 0;
-            border-radius: 4px;
-        }
-        
-        .info-box {
-            background: #d1ecf1;
-            border-left: 4px solid #17a2b8;
             padding: 15px;
             margin: 20px 0;
             border-radius: 4px;
         }
-        
-        .metadata {
-            color: #7f8c8d;
-            font-size: 0.9em;
-            margin-bottom: 30px;
+
+        .success {
+            background: #d4edda;
+            border-left: 4px solid #28a745;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 4px;
         }
-        
-        ul, ol {
-            margin: 15px 0;
-            padding-left: 30px;
-        }
-        
-        li {
-            margin: 8px 0;
-        }
-        
+
         .toc {
-            background: #ecf0f1;
-            padding: 25px;
-            border-radius: 6px;
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 5px;
             margin: 30px 0;
         }
-        
+
         .toc ul {
             list-style: none;
             padding-left: 0;
         }
-        
+
         .toc li {
-            margin: 8px 0;
+            margin: 10px 0;
         }
-        
+
         .toc a {
-            color: #2980b9;
-            text-decoration: none;
-            font-weight: 500;
-        }
-        
-        .toc a:hover {
             color: #3498db;
+            text-decoration: none;
+            padding: 5px 0;
+            display: inline-block;
+        }
+
+        .toc a:hover {
+            color: #2980b9;
             text-decoration: underline;
         }
-        
-        .status-code {
+
+        .version-badge {
+            background: #3498db;
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
             display: inline-block;
-            padding: 4px 10px;
-            border-radius: 3px;
-            font-weight: 600;
             font-size: 0.9em;
+            margin-left: 10px;
         }
-        
-        .status-200 { background: #d4edda; color: #155724; }
-        .status-400 { background: #fff3cd; color: #856404; }
-        .status-500 { background: #f8d7da; color: #721c24; }
-        .status-503 { background: #f8d7da; color: #721c24; }
+
+        .updated-badge {
+            background: #27ae60;
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            display: inline-block;
+            font-size: 0.9em;
+            margin-left: 10px;
+        }
+
+        @media print {
+            body {
+                background: white;
+                max-width: 100%;
+            }
+
+            .container {
+                box-shadow: none;
+                padding: 20px;
+            }
+
+            pre {
+                page-break-inside: avoid;
+            }
+
+            h2 {
+                page-break-before: always;
+            }
+
+            h2:first-of-type {
+                page-break-before: auto;
+            }
+        }
+
+        .checkmark {
+            color: #27ae60;
+            font-weight: bold;
+        }
+
+        .feature-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .feature-item {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            border-left: 3px solid #3498db;
+        }
     </style>
 </head>
+
 <body>
     <div class="container">
-        <h1>Growth Tracker API Documentation</h1>
-        
+        <h1>Growth Tracker API Documentation
+            <span class="version-badge">v2.3</span>
+            <span class="updated-badge">Updated Jan 17, 2026</span>
+        </h1>
+
         <div class="metadata">
-            <strong>Version:</strong> 1.0<br>
-            <strong>Base URL:</strong> <code>http://localhost:8000</code><br>
-            <strong>Last Updated:</strong> January 13, 2026
+            <p><strong>Version:</strong> 2.3</p>
+            <p><strong>Base URL:</strong> <code>http://localhost:8000</code></p>
+            <p><strong>Last Updated:</strong> January 17, 2026 (VERSION 2.3 - Frontend Bug Fixes & Platform
+                Compatibility)</p>
         </div>
 
         <div class="toc">
@@ -255,44 +328,71 @@
                 <li><a href="#overview">1. Overview</a></li>
                 <li><a href="#getting-started">2. Getting Started</a></li>
                 <li><a href="#authentication">3. Authentication</a></li>
-                <li><a href="#endpoints">4. API Endpoints</a>
-                    <ul style="padding-left: 20px;">
-                        <li><a href="#root">Root Endpoint</a></li>
-                        <li><a href="#health">Health Check</a></li>
-                        <li><a href="#database">Database Setup</a></li>
+                <li><a href="#api-endpoints">4. API Endpoints</a>
+                    <ul>
+                        <li><a href="#root-endpoint">Root Endpoint</a></li>
+                        <li><a href="#health-check">Health Check</a></li>
+                        <li><a href="#dashboard">Dashboard</a></li>
+                        <li><a href="#workout-tracker">Workout Tracker</a></li>
+                        <li><a href="#smoking-tracker">Smoking Tracker</a></li>
+                        <li><a href="#database-setup">Database Setup</a></li>
                     </ul>
                 </li>
-                <li><a href="#errors">5. Error Handling</a></li>
-                <li><a href="#models">6. Data Models</a></li>
-                <li><a href="#config">7. Configuration</a></li>
+                <li><a href="#error-handling">5. Error Handling</a></li>
+                <li><a href="#data-models">6. Data Models</a></li>
+                <li><a href="#version-history">7. Version History</a></li>
             </ul>
         </div>
 
-        <h2 id="overview">1. Overview</h2>
-        
-        <p>The Growth Tracker API is a FastAPI-based backend service designed to track personal growth metrics. It provides endpoints for health monitoring, database management, and future features for tracking smoking and workout activities.</p>
-        
+        <h2 id="overview">Overview</h2>
+
+        <p>The Growth Tracker API is a FastAPI-based backend service designed to track personal growth metrics. It
+            provides endpoints for health monitoring, database management, and features for tracking smoking and workout
+            activities.</p>
+
         <h3>Features</h3>
-        <ul>
-            <li>✅ Health check endpoints for application and database monitoring</li>
-            <li>✅ Database initialization and management utilities</li>
-            <li>✅ RESTful API design</li>
-            <li>✅ CORS support for cross-origin requests</li>
-            <li>🔄 Smoking tracker (planned)</li>
-            <li>🔄 Workout tracker (planned)</li>
-        </ul>
+
+        <div class="feature-list">
+            <div class="feature-item">
+                <span class="checkmark">✅</span> Health check endpoints for application and database monitoring
+            </div>
+            <div class="feature-item">
+                <span class="checkmark">✅</span> Database initialization and management utilities
+            </div>
+            <div class="feature-item">
+                <span class="checkmark">✅</span> Dashboard with comprehensive KPIs (streaks, totals, percentages)
+            </div>
+            <div class="feature-item">
+                <span class="checkmark">✅</span> Workout tracker with CRUD operations
+            </div>
+            <div class="feature-item">
+                <span class="checkmark">✅</span> Smoking tracker with CRUD operations
+            </div>
+            <div class="feature-item">
+                <span class="checkmark">✅</span> Upsert endpoints for seamless historical data entry
+            </div>
+            <div class="feature-item">
+                <span class="checkmark">✅</span> RESTful API design
+            </div>
+            <div class="feature-item">
+                <span class="checkmark">✅</span> CORS support for cross-origin requests
+            </div>
+            <div class="feature-item">
+                <span class="checkmark">✅</span> Web browser compatibility for frontend clients
+            </div>
+        </div>
 
         <h3>Tech Stack</h3>
+
         <ul>
             <li><strong>Framework:</strong> FastAPI</li>
             <li><strong>Database:</strong> PostgreSQL</li>
             <li><strong>ORM:</strong> SQLAlchemy</li>
             <li><strong>Server:</strong> Uvicorn</li>
+            <li><strong>Frontend:</strong> React Native (Web + Mobile)</li>
         </ul>
 
-        <div class="page-break"></div>
-
-        <h2 id="getting-started">2. Getting Started</h2>
+        <h2 id="getting-started">Getting Started</h2>
 
         <h3>Prerequisites</h3>
         <ul>
@@ -302,7 +402,7 @@
         </ul>
 
         <h3>Installation</h3>
-        
+
         <p><strong>1. Clone the repository</strong></p>
         <pre><code>git clone &lt;repository-url&gt;
 cd growth-tracker/Backend</code></pre>
@@ -320,212 +420,561 @@ ADMIN_DATABASE_URL=postgresql+psycopg2://postgres:root@localhost:5432/postgres</
         <p>The API will be available at <code>http://localhost:8000</code></p>
 
         <h3>Initial Setup</h3>
-        <div class="info-box">
-            <p>After starting the server, initialize the database:</p>
-            <ol>
-                <li>Create database: <code>POST /db/create_database</code></li>
-                <li>Create tables: <code>POST /db/create_tables</code></li>
-                <li>Verify: <code>GET /api/health/db</code></li>
-            </ol>
-        </div>
+        <p>After starting the server, initialize the database:</p>
+        <ol>
+            <li>Create database: <code>POST /db/create_database</code></li>
+            <li>Create tables: <code>POST /db/create_tables</code></li>
+            <li>Verify: <code>GET /api/health/db</code></li>
+        </ol>
 
-        <div class="page-break"></div>
+        <h2 id="authentication">Authentication</h2>
 
-        <h2 id="authentication">3. Authentication</h2>
-        
         <div class="note">
-            <strong>Current Version:</strong> No authentication required<br><br>
-            All endpoints are currently open and do not require authentication. Authentication and authorization will be added in future versions.
+            <strong>Current Version:</strong> No authentication required
+            <p>All endpoints are currently open and do not require authentication. Authentication and authorization will
+                be added in future versions.</p>
         </div>
 
-        <div class="page-break"></div>
+        <h2 id="api-endpoints">API Endpoints</h2>
 
-        <h2 id="endpoints">4. API Endpoints</h2>
-
-        <h3 id="root">Root Endpoint</h3>
+        <h3 id="root-endpoint">Root Endpoint</h3>
 
         <div class="endpoint">
-            <div class="endpoint-header">
-                <span class="badge get">GET</span>
-                <strong>Get API Status</strong>
-            </div>
-            <div class="endpoint-url">/</div>
-            
+            <h4><span class="method get">GET</span> /</h4>
             <p>Returns basic information about the API.</p>
-            
-            <h4>Response Example</h4>
-            <div class="success">
-                <strong>200 OK</strong>
-                <pre><code>{
+
+            <p><strong>Response:</strong></p>
+            <pre><code>{
   "status": "ok",
   "message": "Growth Tracker API"
 }</code></pre>
-            </div>
 
-            <h4>cURL Example</h4>
-            <pre><code>curl -X GET http://localhost:8000/</code></pre>
+            <p><strong>Status Codes:</strong></p>
+            <ul>
+                <li><span class="status-code success">200 OK</span> - Service is running</li>
+            </ul>
         </div>
 
-        <div class="page-break"></div>
-
-        <h3 id="health">Health Check</h3>
+        <h3 id="health-check">Health Check</h3>
 
         <div class="endpoint">
-            <div class="endpoint-header">
-                <span class="badge get">GET</span>
-                <strong>Check Application Health</strong>
-            </div>
-            <div class="endpoint-url">/api/health/</div>
-            
+            <h4><span class="method get">GET</span> /api/health/</h4>
             <p>Verifies that the API application is running and responsive.</p>
-            
-            <h4>Response Example</h4>
-            <div class="success">
-                <strong>200 OK</strong>
-                <pre><code>{
+
+            <p><strong>Response:</strong></p>
+            <pre><code>{
   "status": "ok",
   "message": "Growth Tracker API running"
 }</code></pre>
-            </div>
 
-            <h4>Status Codes</h4>
-            <table>
-                <tr>
-                    <th>Code</th>
-                    <th>Description</th>
-                </tr>
-                <tr>
-                    <td><span class="status-code status-200">200</span></td>
-                    <td>Application is healthy</td>
-                </tr>
-            </table>
-
-            <h4>cURL Example</h4>
-            <pre><code>curl -X GET http://localhost:8000/api/health/</code></pre>
-
-            <div class="info-box">
-                <strong>Use Case:</strong> Use this endpoint for basic application monitoring and uptime checks.
-            </div>
+            <p><strong>Status Codes:</strong></p>
+            <ul>
+                <li><span class="status-code success">200 OK</span> - Application is healthy</li>
+            </ul>
         </div>
 
         <div class="endpoint">
-            <div class="endpoint-header">
-                <span class="badge get">GET</span>
-                <strong>Check Database Health</strong>
-            </div>
-            <div class="endpoint-url">/api/health/db</div>
-            
+            <h4><span class="method get">GET</span> /api/health/db</h4>
             <p>Verifies database connectivity by executing a lightweight query.</p>
-            
-            <h4>Response Examples</h4>
-            <div class="success">
-                <strong>200 OK - Success</strong>
-                <pre><code>{
+
+            <p><strong>Response (Success):</strong></p>
+            <pre><code>{
   "status": "ok",
   "db": "ok"
 }</code></pre>
-            </div>
 
-            <div class="error">
-                <strong>503 Service Unavailable - Failure</strong>
-                <pre><code>{
+            <p><strong>Response (Failure):</strong></p>
+            <pre><code>{
   "detail": "Database unreachable"
 }</code></pre>
-            </div>
 
-            <h4>Status Codes</h4>
-            <table>
-                <tr>
-                    <th>Code</th>
-                    <th>Description</th>
-                </tr>
-                <tr>
-                    <td><span class="status-code status-200">200</span></td>
-                    <td>Database is connected and responsive</td>
-                </tr>
-                <tr>
-                    <td><span class="status-code status-503">503</span></td>
-                    <td>Database connection failed</td>
-                </tr>
-            </table>
-
-            <h4>cURL Example</h4>
-            <pre><code>curl -X GET http://localhost:8000/api/health/db</code></pre>
-
-            <div class="info-box">
-                <strong>Use Case:</strong> Use this endpoint to monitor database connectivity. Ideal for health checks in container orchestration systems (Kubernetes, Docker Compose).
-            </div>
+            <p><strong>Status Codes:</strong></p>
+            <ul>
+                <li><span class="status-code success">200 OK</span> - Database is connected and responsive</li>
+                <li><span class="status-code error">503 Service Unavailable</span> - Database connection failed</li>
+            </ul>
         </div>
 
-        <div class="page-break"></div>
-
-        <h3 id="database">Database Setup</h3>
-
-        <p>Utility endpoints for database initialization. These should be run during first-time setup or when resetting the database.</p>
+        <h3 id="dashboard">Dashboard</h3>
 
         <div class="endpoint">
-            <div class="endpoint-header">
-                <span class="badge post">POST</span>
-                <strong>Create Database</strong>
+            <h4><span class="method get">GET</span> /api/dashboard/</h4>
+            <p>Returns comprehensive statistics for both workout and smoking tracking.</p>
+
+            <p><strong>Response (Success):</strong></p>
+            <pre><code>{
+  "workout": {
+    "current_streak": 15,
+    "longest_streak": 15,
+    "total_workout_days": 12,
+    "total_days": 17,
+    "workout_percentage": 70.6,
+    "average_duration": 45.5,
+    "most_common_type": "Push"
+  },
+  "smoking": {
+    "current_clean_streak": 7,
+    "longest_clean_streak": 12,
+    "total_relapses": 3,
+    "total_cigarettes": 15,
+    "most_common_location": "Social"
+  },
+  "last_updated": "2026-01-17"
+}</code></pre>
+
+            <div class="success">
+                <strong>Version 2.3 Notes (January 17, 2026):</strong>
+                <ul>
+                    <li><span class="checkmark">✅</span> Field names corrected</li>
+                    <li><span class="checkmark">✅</span> <code>total_workouts</code> replaces
+                        <code>total_workout_days</code></li>
+                    <li><span class="checkmark">✅</span> <code>average_duration</code> replaces
+                        <code>avg_duration</code></li>
+                    <li><span class="checkmark">✅</span> <code>current_clean_streak</code> replaces
+                        <code>current_streak</code> in smoking stats</li>
+                    <li><span class="checkmark">✅</span> <code>longest_clean_streak</code> replaces
+                        <code>longest_streak</code> in smoking stats</li>
+                    <li><span class="checkmark">✅</span> Frontend synchronized to match these field names</li>
+                </ul>
             </div>
-            <div class="endpoint-url">/db/create_database</div>
-            
+
+            <p><strong>Field Descriptions:</strong></p>
+
+            <p><strong>Workout Stats:</strong></p>
+            <ul>
+                <li><code>current_streak</code> - Current consecutive workout days</li>
+                <li><code>longest_streak</code> - Best workout streak achieved</li>
+                <li><code>total_workout_days</code> - Total days with workouts logged</li>
+                <li><code>total_days</code> - Total days in tracking period (2026)</li>
+                <li><code>workout_percentage</code> - Percentage of days with workouts</li>
+                <li><code>average_duration</code> - Average workout duration in minutes</li>
+                <li><code>most_common_type</code> - Most frequently performed workout type</li>
+            </ul>
+
+            <p><strong>Smoking Stats:</strong></p>
+            <ul>
+                <li><code>current_clean_streak</code> - Current consecutive smoke-free days</li>
+                <li><code>longest_clean_streak</code> - Best clean streak achieved</li>
+                <li><code>total_relapses</code> - Total number of relapse days</li>
+                <li><code>total_cigarettes</code> - Total cigarettes smoked across all entries</li>
+                <li><code>most_common_location</code> - Most common relapse location</li>
+            </ul>
+
+            <p><strong>Status Codes:</strong></p>
+            <ul>
+                <li><span class="status-code success">200 OK</span> - Dashboard data retrieved successfully</li>
+            </ul>
+        </div>
+
+        <h3 id="workout-tracker">Workout Tracker</h3>
+
+        <div class="note">
+            <p><strong>Workout Types (Enum) - Updated in v2.3:</strong></p>
+            <ul>
+                <li><code>Push</code> - Push exercises (chest, shoulders, triceps)</li>
+                <li><code>Pull</code> - Pull exercises (back, biceps)</li>
+                <li><code>Legs</code> - Leg exercises (squats, lunges, etc.)</li>
+                <li><code>Upper</code> - Upper body mixed</li>
+                <li><code>Lower</code> - Lower body mixed</li>
+                <li><code>Cardio</code> - Cardiovascular exercises</li>
+                <li><code>Others</code> - Other workout types</li>
+            </ul>
+
+            <p><strong>Intensity Levels (Enum) - Updated in v2.3:</strong></p>
+            <ul>
+                <li><code>Low</code> - Light effort</li>
+                <li><code>Moderate</code> - Medium effort (previously "Medium")</li>
+                <li><code>High</code> - Maximum effort</li>
+            </ul>
+        </div>
+
+        <div class="endpoint">
+            <h4><span class="method post">POST</span> /api/workouts/</h4>
+            <p>Creates a new workout entry for a specific date. Returns error if entry already exists.</p>
+
+            <p><strong>Request Body:</strong></p>
+            <pre><code>{
+  "date": "2026-01-17",
+  "workout_type": "Push",
+  "workout_done": true,
+  "duration_minutes": 45,
+  "intensity": "High",
+  "notes": "Great chest session"
+}</code></pre>
+
+            <p><strong>Response (Success):</strong></p>
+            <pre><code>{
+  "date": "2026-01-17",
+  "workout_type": "Push",
+  "workout_done": true,
+  "duration_minutes": 45,
+  "intensity": "High",
+  "notes": "Great chest session",
+  "created_at": "2026-01-17T10:30:00",
+  "updated_at": "2026-01-17T10:30:00"
+}</code></pre>
+
+            <p><strong>Status Codes:</strong></p>
+            <ul>
+                <li><span class="status-code success">201 Created</span> - Entry created successfully</li>
+                <li><span class="status-code error">400 Bad Request</span> - Entry already exists for this date</li>
+            </ul>
+        </div>
+
+        <div class="endpoint">
+            <h4><span class="method post">POST</span> /api/workouts/upsert/ ⭐ (Recommended)</h4>
+            <p>Creates or updates workout entry for a specific date. Smart endpoint that automatically handles both
+                create and update operations.</p>
+
+            <p><strong>Request Body:</strong></p>
+            <pre><code>{
+  "date": "2026-01-05",
+  "workout_type": "Pull",
+  "workout_done": true,
+  "duration_minutes": 60,
+  "intensity": "Moderate",
+  "notes": "Back and biceps"
+}</code></pre>
+
+            <p><strong>Response (Success):</strong></p>
+            <pre><code>{
+  "date": "2026-01-05",
+  "workout_type": "Pull",
+  "workout_done": true,
+  "duration_minutes": 60,
+  "intensity": "Moderate",
+  "notes": "Back and biceps",
+  "created_at": "2026-01-05T09:00:00",
+  "updated_at": "2026-01-17T11:00:00"
+}</code></pre>
+
+            <div class="success">
+                <strong>Benefits:</strong>
+                <ul>
+                    <li><span class="checkmark">✅</span> No duplicate entry errors</li>
+                    <li><span class="checkmark">✅</span> Single API call for all operations</li>
+                    <li><span class="checkmark">✅</span> Ideal for historical date entry</li>
+                    <li><span class="checkmark">✅</span> Idempotent (safe to retry)</li>
+                    <li><span class="checkmark">✅</span> Used by web and mobile clients</li>
+                </ul>
+            </div>
+
+            <p><strong>Status Codes:</strong></p>
+            <ul>
+                <li><span class="status-code success">200 OK</span> - Entry created or updated successfully</li>
+            </ul>
+        </div>
+
+        <div class="endpoint">
+            <h4><span class="method get">GET</span> /api/workouts/{date}</h4>
+            <p>Retrieves workout entry for a specific date.</p>
+
+            <p><strong>Path Parameters:</strong></p>
+            <ul>
+                <li><code>date</code> (string, required): Date in YYYY-MM-DD format</li>
+            </ul>
+
+            <p><strong>Response (Success):</strong></p>
+            <pre><code>{
+  "date": "2026-01-17",
+  "workout_type": "Push",
+  "workout_done": true,
+  "duration_minutes": 45,
+  "intensity": "High",
+  "notes": "Great session",
+  "created_at": "2026-01-17T10:30:00",
+  "updated_at": "2026-01-17T10:30:00"
+}</code></pre>
+
+            <p><strong>Status Codes:</strong></p>
+            <ul>
+                <li><span class="status-code success">200 OK</span> - Entry found</li>
+                <li><span class="status-code error">404 Not Found</span> - No entry for this date</li>
+            </ul>
+        </div>
+
+        <div class="endpoint">
+            <h4><span class="method put">PUT</span> /api/workouts/{date}</h4>
+            <p>Updates existing workout entry for a specific date.</p>
+
+            <p><strong>Path Parameters:</strong></p>
+            <ul>
+                <li><code>date</code> (string, required): Date in YYYY-MM-DD format</li>
+            </ul>
+
+            <p><strong>Request Body:</strong></p>
+            <pre><code>{
+  "workout_type": "Legs",
+  "duration_minutes": 50,
+  "intensity": "High"
+}</code></pre>
+
+            <p><strong>Response (Success):</strong></p>
+            <pre><code>{
+  "date": "2026-01-17",
+  "workout_type": "Legs",
+  "workout_done": true,
+  "duration_minutes": 50,
+  "intensity": "High",
+  "notes": "Great session",
+  "created_at": "2026-01-17T10:30:00",
+  "updated_at": "2026-01-17T15:00:00"
+}</code></pre>
+
+            <p><strong>Status Codes:</strong></p>
+            <ul>
+                <li><span class="status-code success">200 OK</span> - Entry updated successfully</li>
+                <li><span class="status-code error">404 Not Found</span> - No entry exists for this date</li>
+            </ul>
+        </div>
+
+        <div class="endpoint">
+            <h4><span class="method delete">DELETE</span> /api/workouts/{date}</h4>
+            <p>Deletes workout entry for a specific date.</p>
+
+            <p><strong>Path Parameters:</strong></p>
+            <ul>
+                <li><code>date</code> (string, required): Date in YYYY-MM-DD format</li>
+            </ul>
+
+            <p><strong>Response (Success):</strong> No content</p>
+
+            <p><strong>Status Codes:</strong></p>
+            <ul>
+                <li><span class="status-code success">204 No Content</span> - Entry deleted successfully</li>
+                <li><span class="status-code error">404 Not Found</span> - No entry exists for this date</li>
+            </ul>
+        </div>
+
+        <div class="endpoint">
+            <h4><span class="method get">GET</span> /api/workouts/history/</h4>
+            <p>Retrieves list of all workout entries with optional date filtering.</p>
+
+            <p><strong>Query Parameters:</strong></p>
+            <ul>
+                <li><code>start_date</code> (string, optional): Filter from this date (YYYY-MM-DD)</li>
+                <li><code>end_date</code> (string, optional): Filter until this date (YYYY-MM-DD)</li>
+            </ul>
+
+            <p><strong>Response (Success):</strong></p>
+            <pre><code>[
+  {
+    "date": "2026-01-17",
+    "workout_type": "Push",
+    "workout_done": true,
+    "duration_minutes": 45,
+    "intensity": "High",
+    "notes": "Great session",
+    "created_at": "2026-01-17T10:30:00",
+    "updated_at": "2026-01-17T10:30:00"
+  },
+  {
+    "date": "2026-01-16",
+    "workout_type": "Pull",
+    "workout_done": true,
+    "duration_minutes": 50,
+    "intensity": "Moderate",
+    "notes": null,
+    "created_at": "2026-01-16T09:00:00",
+    "updated_at": "2026-01-16T09:00:00"
+  }
+]</code></pre>
+
+            <p><strong>Status Codes:</strong></p>
+            <ul>
+                <li><span class="status-code success">200 OK</span> - List retrieved successfully (may be empty)</li>
+            </ul>
+        </div>
+
+        <h3 id="smoking-tracker">Smoking Tracker</h3>
+
+        <div class="note">
+            <p><strong>Location Types (Enum):</strong></p>
+            <ul>
+                <li><code>Home</code> - At home</li>
+                <li><code>Work</code> - At workplace</li>
+                <li><code>Social</code> - Social gatherings</li>
+                <li><code>Other</code> - Other locations</li>
+            </ul>
+        </div>
+
+        <div class="endpoint">
+            <h4><span class="method post">POST</span> /api/smoking/</h4>
+            <p>Creates a new smoking entry for a specific date. Returns error if entry already exists.</p>
+
+            <p><strong>Request Body:</strong></p>
+            <pre><code>{
+  "date": "2026-01-10",
+  "cigarette_count": 3,
+  "location": "Social",
+  "remarks": "Party with friends"
+}</code></pre>
+
+            <p><strong>Response (Success):</strong></p>
+            <pre><code>{
+  "date": "2026-01-10",
+  "cigarette_count": 3,
+  "location": "Social",
+  "remarks": "Party with friends",
+  "created_at": "2026-01-10T20:00:00"
+}</code></pre>
+
+            <p><strong>Status Codes:</strong></p>
+            <ul>
+                <li><span class="status-code success">201 Created</span> - Entry created successfully</li>
+                <li><span class="status-code error">400 Bad Request</span> - Entry already exists for this date</li>
+            </ul>
+        </div>
+
+        <div class="endpoint">
+            <h4><span class="method post">POST</span> /api/smoking/upsert/ ⭐ (Recommended)</h4>
+            <p>Creates or updates smoking entry for a specific date. Recommended for all data entry operations.</p>
+
+            <p><strong>Request Body:</strong></p>
+            <pre><code>{
+  "date": "2026-01-10",
+  "cigarette_count": 5,
+  "location": "Work",
+  "remarks": "Stressful day"
+}</code></pre>
+
+            <p><strong>Response (Success):</strong></p>
+            <pre><code>{
+  "date": "2026-01-10",
+  "cigarette_count": 5,
+  "location": "Work",
+  "remarks": "Stressful day",
+  "created_at": "2026-01-10T20:00:00"
+}</code></pre>
+
+            <div class="success">
+                <strong>Benefits:</strong>
+                <ul>
+                    <li><span class="checkmark">✅</span> No duplicate entry errors</li>
+                    <li><span class="checkmark">✅</span> Single API call for all operations</li>
+                    <li><span class="checkmark">✅</span> Ideal for historical date entry</li>
+                    <li><span class="checkmark">✅</span> Clean streak recalculates automatically</li>
+                </ul>
+            </div>
+
+            <p><strong>Status Codes:</strong></p>
+            <ul>
+                <li><span class="status-code success">200 OK</span> - Entry created or updated successfully</li>
+            </ul>
+        </div>
+
+        <div class="endpoint">
+            <h4><span class="method get">GET</span> /api/smoking/{date}</h4>
+            <p>Retrieves smoking entry for a specific date.</p>
+
+            <p><strong>Path Parameters:</strong></p>
+            <ul>
+                <li><code>date</code> (string, required): Date in YYYY-MM-DD format</li>
+            </ul>
+
+            <p><strong>Response (Success):</strong></p>
+            <pre><code>{
+  "date": "2026-01-10",
+  "cigarette_count": 3,
+  "location": "Social",
+  "remarks": "Party with friends",
+  "created_at": "2026-01-10T20:00:00"
+}</code></pre>
+
+            <p><strong>Status Codes:</strong></p>
+            <ul>
+                <li><span class="status-code success">200 OK</span> - Entry found</li>
+                <li><span class="status-code error">404 Not Found</span> - No entry for this date</li>
+            </ul>
+        </div>
+
+        <div class="endpoint">
+            <h4><span class="method delete">DELETE</span> /api/smoking/{date}</h4>
+            <p>Deletes smoking entry for a specific date.</p>
+
+            <p><strong>Path Parameters:</strong></p>
+            <ul>
+                <li><code>date</code> (string, required): Date in YYYY-MM-DD format</li>
+            </ul>
+
+            <p><strong>Response (Success):</strong> No content</p>
+
+            <p><strong>Status Codes:</strong></p>
+            <ul>
+                <li><span class="status-code success">204 No Content</span> - Entry deleted successfully</li>
+                <li><span class="status-code error">404 Not Found</span> - No entry exists for this date</li>
+            </ul>
+        </div>
+
+        <div class="endpoint">
+            <h4><span class="method get">GET</span> /api/smoking/history/</h4>
+            <p>Retrieves list of all smoking entries with optional date filtering.</p>
+
+            <p><strong>Query Parameters:</strong></p>
+            <ul>
+                <li><code>start_date</code> (string, optional): Filter from this date (YYYY-MM-DD)</li>
+                <li><code>end_date</code> (string, optional): Filter until this date (YYYY-MM-DD)</li>
+            </ul>
+
+            <p><strong>Response (Success):</strong></p>
+            <pre><code>[
+  {
+    "date": "2026-01-10",
+    "cigarette_count": 3,
+    "location": "Social",
+    "remarks": "Party with friends",
+    "created_at": "2026-01-10T20:00:00"
+  },
+  {
+    "date": "2026-01-05",
+    "cigarette_count": 2,
+    "location": "Work",
+    "remarks": null,
+    "created_at": "2026-01-05T12:00:00"
+  }
+]</code></pre>
+
+            <p><strong>Status Codes:</strong></p>
+            <ul>
+                <li><span class="status-code success">200 OK</span> - List retrieved successfully (may be empty)</li>
+            </ul>
+        </div>
+
+        <h3 id="database-setup">Database Setup</h3>
+
+        <div class="endpoint">
+            <h4><span class="method post">POST</span> /db/create_database</h4>
             <p>Creates a new PostgreSQL database on the server.</p>
-            
-            <h4>Request Body</h4>
+
+            <p><strong>Request Body:</strong></p>
             <pre><code>{
   "db_name": "growth_tracker"
 }</code></pre>
 
-            <h4>Parameters</h4>
-            <table>
-                <tr>
-                    <th>Field</th>
-                    <th>Type</th>
-                    <th>Required</th>
-                    <th>Description</th>
-                </tr>
-                <tr>
-                    <td><code>db_name</code></td>
-                    <td>string</td>
-                    <td>Yes</td>
-                    <td>Name of the database to create (default: "growth_tracker")</td>
-                </tr>
-            </table>
-
-            <h4>Response Examples</h4>
-            <div class="success">
-                <strong>200 OK - New Database Created</strong>
-                <pre><code>{
+            <p><strong>Response (Success - New Database):</strong></p>
+            <pre><code>{
   "status": "ok",
   "detail": "database 'growth_tracker' created"
 }</code></pre>
-            </div>
 
-            <div class="success">
-                <strong>200 OK - Already Exists</strong>
-                <pre><code>{
+            <p><strong>Response (Success - Already Exists):</strong></p>
+            <pre><code>{
   "status": "ok",
   "detail": "database 'growth_tracker' already exists"
 }</code></pre>
-            </div>
 
-            <div class="error">
-                <strong>500 Internal Server Error</strong>
-                <pre><code>{
-  "detail": "&lt;error message&gt;"
-}</code></pre>
-            </div>
-
-            <h4>cURL Example</h4>
-            <pre><code>curl -X POST http://localhost:8000/db/create_database \
-  -H "Content-Type: application/json" \
-  -d '{"db_name": "growth_tracker"}'</code></pre>
+            <p><strong>Status Codes:</strong></p>
+            <ul>
+                <li><span class="status-code success">200 OK</span> - Database created successfully or already exists
+                </li>
+                <li><span class="status-code error">500 Internal Server Error</span> - Failed to create database</li>
+            </ul>
 
             <div class="note">
                 <strong>Important Notes:</strong>
                 <ul>
-                    <li>This endpoint connects to the admin database (typically 'postgres') using <code>admin_database_url</code></li>
+                    <li>This endpoint connects to the admin database (typically 'postgres') using
+                        <code>admin_database_url</code></li>
                     <li>Requires appropriate PostgreSQL permissions to create databases</li>
                     <li>Idempotent - safe to call multiple times</li>
                     <li>Must be run before creating tables</li>
@@ -534,51 +983,22 @@ ADMIN_DATABASE_URL=postgresql+psycopg2://postgres:root@localhost:5432/postgres</
         </div>
 
         <div class="endpoint">
-            <div class="endpoint-header">
-                <span class="badge post">POST</span>
-                <strong>Create Tables</strong>
-            </div>
-            <div class="endpoint-url">/db/create_tables</div>
-            
+            <h4><span class="method post">POST</span> /db/create_tables</h4>
             <p>Creates all database tables defined in SQLAlchemy models.</p>
-            
-            <h4>Request Body</h4>
-            <p>None required</p>
 
-            <h4>Response Examples</h4>
-            <div class="success">
-                <strong>200 OK</strong>
-                <pre><code>{
+            <p><strong>Request Body:</strong> None required</p>
+
+            <p><strong>Response (Success):</strong></p>
+            <pre><code>{
   "status": "ok",
   "detail": "tables created or already exist"
 }</code></pre>
-            </div>
 
-            <div class="error">
-                <strong>500 Internal Server Error</strong>
-                <pre><code>{
-  "detail": "&lt;error message&gt;"
-}</code></pre>
-            </div>
-
-            <h4>Status Codes</h4>
-            <table>
-                <tr>
-                    <th>Code</th>
-                    <th>Description</th>
-                </tr>
-                <tr>
-                    <td><span class="status-code status-200">200</span></td>
-                    <td>Tables created successfully or already exist</td>
-                </tr>
-                <tr>
-                    <td><span class="status-code status-500">500</span></td>
-                    <td>Failed to create tables</td>
-                </tr>
-            </table>
-
-            <h4>cURL Example</h4>
-            <pre><code>curl -X POST http://localhost:8000/db/create_tables</code></pre>
+            <p><strong>Status Codes:</strong></p>
+            <ul>
+                <li><span class="status-code success">200 OK</span> - Tables created successfully or already exist</li>
+                <li><span class="status-code error">500 Internal Server Error</span> - Failed to create tables</li>
+            </ul>
 
             <div class="note">
                 <strong>Important Notes:</strong>
@@ -591,9 +1011,7 @@ ADMIN_DATABASE_URL=postgresql+psycopg2://postgres:root@localhost:5432/postgres</
             </div>
         </div>
 
-        <div class="page-break"></div>
-
-        <h2 id="errors">5. Error Handling</h2>
+        <h2 id="error-handling">Error Handling</h2>
 
         <p>The API follows standard HTTP status codes and returns errors in a consistent format.</p>
 
@@ -604,155 +1022,302 @@ ADMIN_DATABASE_URL=postgresql+psycopg2://postgres:root@localhost:5432/postgres</
 
         <h3>Common Status Codes</h3>
         <table>
-            <tr>
-                <th>Code</th>
-                <th>Description</th>
-                <th>When It Occurs</th>
-            </tr>
-            <tr>
-                <td><span class="status-code status-200">200</span></td>
-                <td>OK</td>
-                <td>Request succeeded</td>
-            </tr>
-            <tr>
-                <td><span class="status-code status-400">400</span></td>
-                <td>Bad Request</td>
-                <td>Invalid request parameters</td>
-            </tr>
-            <tr>
-                <td><span class="status-code status-400">404</span></td>
-                <td>Not Found</td>
-                <td>Endpoint doesn't exist</td>
-            </tr>
-            <tr>
-                <td><span class="status-code status-400">422</span></td>
-                <td>Unprocessable Entity</td>
-                <td>Request validation failed</td>
-            </tr>
-            <tr>
-                <td><span class="status-code status-500">500</span></td>
-                <td>Internal Server Error</td>
-                <td>Server-side error occurred</td>
-            </tr>
-            <tr>
-                <td><span class="status-code status-503">503</span></td>
-                <td>Service Unavailable</td>
-                <td>Database or service unreachable</td>
-            </tr>
+            <thead>
+                <tr>
+                    <th>Code</th>
+                    <th>Description</th>
+                    <th>When It Occurs</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>200</td>
+                    <td>OK</td>
+                    <td>Request succeeded</td>
+                </tr>
+                <tr>
+                    <td>201</td>
+                    <td>Created</td>
+                    <td>Resource created successfully</td>
+                </tr>
+                <tr>
+                    <td>204</td>
+                    <td>No Content</td>
+                    <td>Resource deleted successfully</td>
+                </tr>
+                <tr>
+                    <td>400</td>
+                    <td>Bad Request</td>
+                    <td>Invalid request parameters or duplicate entry</td>
+                </tr>
+                <tr>
+                    <td>404</td>
+                    <td>Not Found</td>
+                    <td>Resource or endpoint doesn't exist</td>
+                </tr>
+                <tr>
+                    <td>422</td>
+                    <td>Unprocessable Entity</td>
+                    <td>Request validation failed</td>
+                </tr>
+                <tr>
+                    <td>500</td>
+                    <td>Internal Server Error</td>
+                    <td>Server-side error occurred</td>
+                </tr>
+                <tr>
+                    <td>503</td>
+                    <td>Service Unavailable</td>
+                    <td>Database or service unreachable</td>
+                </tr>
+            </tbody>
         </table>
 
         <h3>Example Error Responses</h3>
 
-        <div class="error">
-            <strong>Validation Error (422)</strong>
-            <pre><code>{
+        <p><strong>Validation Error (422):</strong></p>
+        <pre><code>{
   "detail": [
     {
-      "loc": ["body", "db_name"],
-      "msg": "field required",
-      "type": "value_error.missing"
+      "loc": ["body", "workout_type"],
+      "msg": "value is not a valid enumeration member; permitted: 'Push', 'Pull', 'Legs', 'Upper', 'Lower', 'Cardio', 'Others'",
+      "type": "type_error.enum"
     }
   ]
 }</code></pre>
-        </div>
 
-        <div class="error">
-            <strong>Database Unreachable (503)</strong>
-            <pre><code>{
+        <p><strong>Duplicate Entry (400):</strong></p>
+        <pre><code>{
+  "detail": "Entry already exists for 2026-01-17"
+}</code></pre>
+
+        <p><strong>Database Unreachable (503):</strong></p>
+        <pre><code>{
   "detail": "Database unreachable"
 }</code></pre>
+
+        <h2 id="data-models">Data Models</h2>
+
+        <h3>Dashboard Response</h3>
+        <pre><code>{
+  workout: {
+    current_streak: number,        // Current workout streak (days)
+    longest_streak: number,        // Best workout streak
+    total_workout_days: number,    // Total days with workouts
+    total_days: number,            // Total tracking days
+    workout_percentage: number,    // Workout adherence %
+    average_duration: number,      // Avg workout duration (min)
+    most_common_type: string       // Most frequent workout type
+  },
+  smoking: {
+    current_clean_streak: number,  // Current smoke-free days
+    longest_clean_streak: number,  // Best clean streak
+    total_relapses: number,        // Total relapse days
+    total_cigarettes: number,      // Total cigarettes smoked
+    most_common_location: string   // Most common relapse location
+  },
+  last_updated: string             // ISO date string
+}</code></pre>
+
+        <h3>Workout Entry</h3>
+        <pre><code>{
+  date: string,                    // YYYY-MM-DD format (primary key)
+  workout_type: WorkoutType,       // Push | Pull | Legs | Upper | Lower | Cardio | Others
+  workout_done: boolean,           // Whether workout was completed
+  duration_minutes: number,        // Workout duration
+  intensity?: IntensityLevel,      // Low | Moderate | High (optional)
+  notes?: string,                  // Optional notes (optional)
+  created_at: string,              // ISO timestamp
+  updated_at: string               // ISO timestamp
+}</code></pre>
+
+        <h3>Smoking Entry</h3>
+        <pre><code>{
+  date: string,                    // YYYY-MM-DD format (primary key)
+  cigarette_count: number,         // Number of cigarettes (min: 1)
+  location?: Location,             // Home | Work | Social | Other (optional)
+  remarks?: string,                // Optional notes (optional)
+  created_at: string               // ISO timestamp
+}</code></pre>
+
+        <h3>Date Format Notes</h3>
+
+        <p><strong>Backend:</strong></p>
+        <ul>
+            <li>All dates stored as DATE type (no time component)</li>
+            <li>Format: <code>YYYY-MM-DD</code> (ISO 8601)</li>
+            <li>Example: <code>"2026-01-17"</code></li>
+            <li>Date is the primary key for entries</li>
+        </ul>
+
+        <p><strong>Frontend Handling (v2.3):</strong></p>
+        <ul>
+            <li>Web: Uses HTML5 <code>&lt;input type="date"&gt;</code></li>
+            <li>Mobile: Uses native DateTimePicker component</li>
+            <li>Parsing: Always append <code>T00:00:00</code> to prevent timezone issues</li>
+            <li>Example: <code>new Date("2026-01-17T00:00:00")</code></li>
+            <li>This ensures correct date display regardless of user timezone</li>
+        </ul>
+
+        <h2 id="version-history">Version History</h2>
+
+        <div class="success">
+            <h3>Version 2.3 (January 17, 2026) - Frontend Bug Fixes</h3>
+
+            <p><strong>Fixed:</strong></p>
+            <ul>
+                <li><span class="checkmark">✅</span> Dashboard field name corrections
+                    <ul>
+                        <li><code>total_workouts</code> → <code>total_workout_days</code></li>
+                        <li><code>avg_duration</code> → <code>average_duration</code></li>
+                        <li><code>current_streak</code> → <code>current_clean_streak</code> (smoking)</li>
+                        <li><code>longest_streak</code> → <code>longest_clean_streak</code> (smoking)</li>
+                    </ul>
+                </li>
+                <li><span class="checkmark">✅</span> Workout type enum synchronized
+                    <ul>
+                        <li>Updated to: Push, Pull, Legs, Upper, Lower, Cardio, Others</li>
+                    </ul>
+                </li>
+                <li><span class="checkmark">✅</span> Intensity level correction
+                    <ul>
+                        <li>Changed: Medium → Moderate</li>
+                    </ul>
+                </li>
+                <li><span class="checkmark">✅</span> Date handling improvements
+                    <ul>
+                        <li>Added timezone normalization (T00:00:00)</li>
+                        <li>Platform-specific date pickers (web vs mobile)</li>
+                    </ul>
+                </li>
+                <li><span class="checkmark">✅</span> Web browser compatibility
+                    <ul>
+                        <li>HTML5 date input for web clients</li>
+                        <li>Native pickers for iOS/Android</li>
+                    </ul>
+                </li>
+            </ul>
+
+            <p><strong>Frontend Changes:</strong></p>
+            <ul>
+                <li>8 files modified</li>
+                <li>~380 lines changed</li>
+                <li>Platform detection added (web vs mobile)</li>
+                <li>Date formatting standardized</li>
+                <li>Color scheme improved</li>
+            </ul>
+
+            <p><strong>Documentation:</strong></p>
+            <ul>
+                <li>API docs updated with correct field names</li>
+                <li>Enum values documented</li>
+                <li>Platform-specific notes added</li>
+                <li>Date handling best practices included</li>
+            </ul>
         </div>
 
-        <div class="page-break"></div>
+        <div class="note">
+            <h3>Version 2.2 (January 13, 2026) - Historical Date Support</h3>
 
-        <h2 id="models">6. Data Models</h2>
+            <p><strong>Added:</strong></p>
+            <ul>
+                <li><span class="checkmark">✅</span> Upsert endpoints for both workout and smoking</li>
+                <li><span class="checkmark">✅</span> Dashboard endpoint with comprehensive KPIs</li>
+                <li><span class="checkmark">✅</span> Streak calculation logic</li>
+                <li><span class="checkmark">✅</span> Historical date entry support</li>
+                <li><span class="checkmark">✅</span> Most common workout type tracking</li>
+                <li><span class="checkmark">✅</span> Location-based smoking statistics</li>
+            </ul>
 
-        <h3>CreateDatabaseRequest</h3>
-        <p>Used for creating a new database.</p>
-        <pre><code>{
-  "db_name": "string"  // Required, default: "growth_tracker"
-}</code></pre>
+            <p><strong>Improved:</strong></p>
+            <ul>
+                <li>Better error messages</li>
+                <li>Idempotent operations</li>
+                <li>Clean streak recalculation</li>
+            </ul>
+        </div>
 
-        <h3>Future Models</h3>
-        <p>The following models are defined but not yet used in active endpoints:</p>
+        <div class="note">
+            <h3>Version 2.0 (January 13, 2026) - Full CRUD Implementation</h3>
 
-        <h4>SmokingEntry</h4>
-        <pre><code>{
-  "date": "string",           // Required, format: YYYY-MM-DD
-  "cigarettes": "integer",    // Required
-  "notes": "string"           // Optional
-}</code></pre>
+            <p><strong>Added:</strong></p>
+            <ul>
+                <li><span class="checkmark">✅</span> Complete workout tracker endpoints</li>
+                <li><span class="checkmark">✅</span> Complete smoking tracker endpoints</li>
+                <li><span class="checkmark">✅</span> Date-based primary keys</li>
+                <li><span class="checkmark">✅</span> Enum validation for types and intensity</li>
+                <li><span class="checkmark">✅</span> Comprehensive test coverage (84%)</li>
+            </ul>
+        </div>
 
-        <h4>WorkoutEntry</h4>
-        <pre><code>{
-  "date": "string",           // Required, format: YYYY-MM-DD
-  "activity": "string",       // Required (e.g., "Running", "Gym")
-  "duration_minutes": "integer",  // Required
-  "notes": "string"           // Optional
-}</code></pre>
+        <div class="note">
+            <h3>Version 1.0 (January 13, 2026) - Initial Release</h3>
 
-        <div class="page-break"></div>
+            <p><strong>Added:</strong></p>
+            <ul>
+                <li><span class="checkmark">✅</span> Root endpoint</li>
+                <li><span class="checkmark">✅</span> Health check endpoints</li>
+                <li><span class="checkmark">✅</span> Database setup utilities</li>
+                <li><span class="checkmark">✅</span> Basic API structure</li>
+            </ul>
+        </div>
 
-        <h2 id="config">7. Configuration</h2>
+        <h2>Frontend Integration Notes</h2>
 
-        <p>The API can be configured using environment variables or a <code>.env</code> file.</p>
+        <h3>React Native Client</h3>
 
-        <h3>Available Settings</h3>
-        <table>
-            <tr>
-                <th>Variable</th>
-                <th>Type</th>
-                <th>Default</th>
-                <th>Description</th>
-            </tr>
-            <tr>
-                <td><code>APP_NAME</code></td>
-                <td>string</td>
-                <td>"Growth Tracker API"</td>
-                <td>Application name</td>
-            </tr>
-            <tr>
-                <td><code>ENV</code></td>
-                <td>string</td>
-                <td>"dev"</td>
-                <td>Environment (dev, staging, prod)</td>
-            </tr>
-            <tr>
-                <td><code>DATABASE_URL</code></td>
-                <td>string</td>
-                <td>postgresql+psycopg2://postgres:root@localhost:5432/growth_tracker</td>
-                <td>Main database connection string</td>
-            </tr>
-            <tr>
-                <td><code>ADMIN_DATABASE_URL</code></td>
-                <td>string</td>
-                <td>postgresql+psycopg2://postgres:root@localhost:5432/postgres</td>
-                <td>Admin database for creating databases</td>
-            </tr>
-            <tr>
-                <td><code>CORS_ORIGINS</code></td>
-                <td>list</td>
-                <td>["*"]</td>
-                <td>Allowed CORS origins</td>
-            </tr>
-        </table>
+        <p><strong>Web Browser:</strong></p>
+        <ul>
+            <li>Uses HTML5 <code>&lt;input type="date"&gt;</code> for date selection</li>
+            <li>Detects platform via <code>Platform.OS === 'web'</code></li>
+            <li>Date stored as string (YYYY-MM-DD)</li>
+        </ul>
 
-        <h3>Example .env File</h3>
-        <pre><code>APP_NAME=Growth Tracker API
-ENV=production
-DATABASE_URL=postgresql+psycopg2://user:password@db-host:5432/growth_tracker
-ADMIN_DATABASE_URL=postgresql+psycopg2://user:password@db-host:5432/postgres
-CORS_ORIGINS=["https://app.example.com"]</code></pre>
+        <p><strong>Mobile (iOS/Android):</strong></p>
+        <ul>
+            <li>Uses <code>@react-native-community/datetimepicker</code></li>
+            <li>Native date picker UI</li>
+            <li>Date stored as Date object, converted to string for API</li>
+        </ul>
 
-        <div class="page-break"></div>
+        <p><strong>Date Handling Best Practice:</strong></p>
+        <pre><code>// Parsing date from API
+const date = new Date(apiDate + 'T00:00:00'); // Timezone safe
 
-        <h2>Development Resources</h2>
+// Formatting for API
+const formatDate = (date) => {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+};</code></pre>
+
+        <p><strong>Field Mapping Reference:</strong></p>
+        <pre><code>// Dashboard
+dashboardResponse.data.workout.current_streak ✅
+dashboardResponse.data.workout.total_workout_days ✅
+dashboardResponse.data.workout.average_duration ✅
+dashboardResponse.data.smoking.current_clean_streak ✅
+dashboardResponse.data.smoking.longest_clean_streak ✅
+
+// Workout Entry
+entry.date ✅
+entry.workout_type ✅
+entry.duration_minutes ✅
+entry.intensity ✅
+
+// Smoking Entry
+entry.date ✅
+entry.cigarette_count ✅
+entry.location ✅</code></pre>
+
+        <h2>Development</h2>
 
         <h3>Running Tests</h3>
         <pre><code>pytest tests/</code></pre>
 
-        <h3>Interactive API Documentation</h3>
-        <p>FastAPI provides built-in interactive API documentation:</p>
+        <h3>API Documentation</h3>
+        <p>FastAPI provides interactive API documentation:</p>
         <ul>
             <li><strong>Swagger UI:</strong> <a href="http://localhost:8000/docs">http://localhost:8000/docs</a></li>
             <li><strong>ReDoc:</strong> <a href="http://localhost:8000/redoc">http://localhost:8000/redoc</a></li>
@@ -761,45 +1326,29 @@ CORS_ORIGINS=["https://app.example.com"]</code></pre>
         <h3>Project Structure</h3>
         <pre><code>Backend/
 ├── api/              # API route handlers
+│   ├── dashboard.py  # Dashboard KPIs
+│   ├── workout.py    # Workout CRUD
+│   ├── smoking.py    # Smoking CRUD
+│   └── health.py     # Health checks
 ├── core/             # Settings and configuration
 ├── db/               # Database models and connection
-├── api-docs/         # API documentation and Postman collection
-├── tests/            # Test files
+├── api-docs/         # API documentation (this file)
+├── tests/            # Test files (84% coverage)
 ├── app.py            # Main application entry point
 └── requirements.txt  # Python dependencies</code></pre>
 
-        <div class="page-break"></div>
+        <hr>
 
-        <h2>Changelog</h2>
+        <p style="text-align: center; color: #7f8c8d; margin-top: 40px;">
+            <strong>Last Updated:</strong> January 17, 2026<br>
+            <strong>Version:</strong> 2.3<br>
+            <strong>API Status:</strong> Production Ready
+        </p>
 
-        <h3>Version 1.0.0 (January 13, 2026)</h3>
-
-        <h4>Added</h4>
-        <ul>
-            <li>Root endpoint for basic status</li>
-            <li>Health check endpoints (app and database)</li>
-            <li>Database creation endpoint</li>
-            <li>Table creation endpoint</li>
-            <li>Comprehensive API documentation</li>
-        </ul>
-
-        <h4>Removed</h4>
-        <ul>
-            <li>S3 service integration</li>
-            <li>Alembic migration support</li>
-        </ul>
-
-        <h4>Planned</h4>
-        <ul>
-            <li>Smoking tracker endpoints</li>
-            <li>Workout tracker endpoints</li>
-            <li>Authentication and authorization</li>
-            <li>User management</li>
-        </ul>
-
-        <hr style="margin: 40px 0; border: none; border-top: 2px solid #ecf0f1;">
-        
-        <p style="text-align: center; color: #7f8c8d; font-style: italic;">End of Documentation</p>
+        <p style="text-align: center; color: #7f8c8d; margin-top: 20px;">
+            <em>End of Documentation</em>
+        </p>
     </div>
 </body>
+
 </html>
