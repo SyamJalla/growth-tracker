@@ -11,6 +11,7 @@ A complete full-stack application for tracking personal growth metrics including
 - ✅ Smoking tracker with relapse monitoring
 - ✅ Dashboard with comprehensive KPIs
 - ✅ Health check endpoints (app & database)
+- ✅ Upsert endpoints for seamless data entry
 - ✅ Comprehensive API documentation
 - ✅ Docker support with docker-compose
 - ✅ Environment-based configuration
@@ -23,6 +24,9 @@ A complete full-stack application for tracking personal growth metrics including
 - ✅ Dashboard with KPIs and charts
 - ✅ Workout logging and tracking
 - ✅ Smoking entry tracking with streaks
+- ✅ Historical date support (any date in 2026)
+- ✅ Date validation (no future entries)
+- ✅ Smoking clean streak warning
 - ✅ Health status monitoring
 - ✅ Pull-to-refresh functionality
 - ✅ Form validation and error handling
@@ -36,9 +40,11 @@ A complete full-stack application for tracking personal growth metrics including
 - pip package manager
 
 ### Frontend
-- Node.js 14+
+- **Node.js 20.x LTS** (Required for Expo SDK 50)
 - npm or yarn
 - Expo CLI (optional, for development)
+
+**⚠️ Important:** Node.js 24.x is not compatible with Expo SDK 50. Please use Node.js 20.x LTS.
 
 ## 🛠️ Installation
 

@@ -3,6 +3,7 @@ from sqlalchemy import text
 from sqlalchemy.orm import Session
 
 from db.database import get_db
+from db.models import HealthCheck
 
 router = APIRouter()
 
@@ -15,8 +16,21 @@ def app_health():
 @router.get("/db", tags=["health"])
 def db_health(db: Session = Depends(get_db)):
     try:
-        # simple lightweight check
-        db.execute(text("SELECT 1"))
-        return {"status": "ok", "db": "ok"}
-    except Exception:
-        raise HTTPException(status_code=503, detail="Database unreachable")
+        # Query the health_check table
+        health_record = db.query(HealthCheck).first()
+        
+        if health_record:
+            return {
+                "status": "ok", 
+                "db": "ok",
+                "message": health_record.message,
+                "created_at": health_record.created_at.isoformat()
+            }
+        else:
+            return {
+                "status": "ok", 
+                "db": "ok",
+                "message": "No health check message found in database"
+            }
+    except Exception as e:
+        raise HTTPException(status_code=503, detail=f"Database unreachable: {str(e)}")

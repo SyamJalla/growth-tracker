@@ -26,13 +26,20 @@ export default function WorkoutTrackerScreen() {
     const fetchWorkouts = async () => {
         try {
             setError(null);
-            const [workoutsResponse, statsResponse] = await Promise.all([
+            const [workoutsResponse, dashboardResponse] = await Promise.all([
                 workoutApi.getAllWorkouts(),
-                workoutApi.getWeeklyStats(),
+                workoutApi.getWeeklyStats(), // Returns dashboard data
             ]);
 
+            console.log('📦 Workouts Response:', workoutsResponse.data);
+            console.log('📦 Dashboard Response:', dashboardResponse.data);
+
             setWorkouts(workoutsResponse.data);
-            setWeeklyStats(statsResponse.data);
+
+            // Dashboard returns both workout and smoking data
+            if (dashboardResponse.data.workout) {
+                setWeeklyStats(dashboardResponse.data.workout);
+            }
         } catch (err) {
             setError(err.message || 'Failed to load workouts');
             console.error('Workout fetch error:', err);
@@ -61,7 +68,7 @@ export default function WorkoutTrackerScreen() {
         setModalVisible(true);
     };
 
-    const handleDeleteWorkout = (workoutId) => {
+    const handleDeleteWorkout = (workoutDate) => {
         Alert.alert(
             'Delete Workout',
             'Are you sure you want to delete this workout?',
@@ -72,7 +79,7 @@ export default function WorkoutTrackerScreen() {
                     style: 'destructive',
                     onPress: async () => {
                         try {
-                            await workoutApi.deleteWorkout(workoutId);
+                            await workoutApi.deleteWorkout(workoutDate);
                             fetchWorkouts();
                         } catch (err) {
                             Alert.alert('Error', 'Failed to delete workout');
@@ -85,22 +92,21 @@ export default function WorkoutTrackerScreen() {
 
     const handleSaveWorkout = async (workoutData) => {
         try {
-            if (editingWorkout) {
-                await workoutApi.updateWorkout(editingWorkout.id, workoutData);
-            } else {
-                await workoutApi.logWorkout(workoutData);
-            }
+            console.log('💾 Saving workout:', workoutData);
+            await workoutApi.upsertWorkout(workoutData);
             setModalVisible(false);
+            setEditingWorkout(null);
             fetchWorkouts();
         } catch (err) {
-            Alert.alert('Error', 'Failed to save workout');
+            console.error('Save workout error:', err);
+            Alert.alert('Error', err.response?.data?.detail || 'Failed to save workout');
         }
     };
 
     if (loading) {
         return (
             <View style={styles.centerContainer}>
-                <ActivityIndicator size="large" color="#2196F3" />
+                <ActivityIndicator size="large" color="#4A90E2" />
                 <Text style={styles.loadingText}>Loading workouts...</Text>
             </View>
         );
@@ -121,19 +127,39 @@ export default function WorkoutTrackerScreen() {
                 {weeklyStats && (
                     <Card style={styles.statsCard}>
                         <Card.Content>
-                            <Title>This Week's Stats</Title>
+                            <Title style={styles.cardTitle}>💪 Workout Progress</Title>
                             <View style={styles.statsRow}>
                                 <View style={styles.statItem}>
-                                    <Paragraph style={styles.statLabel}>Workouts</Paragraph>
-                                    <Title>{weeklyStats.total_workouts || 0}</Title>
+                                    <Title style={styles.statValue}>
+                                        {weeklyStats.current_streak || 0}
+                                    </Title>
+                                    <Paragraph style={styles.statLabel}>Current Streak</Paragraph>
                                 </View>
                                 <View style={styles.statItem}>
-                                    <Paragraph style={styles.statLabel}>Total Time</Paragraph>
-                                    <Title>{weeklyStats.total_duration || 0} min</Title>
+                                    <Title style={styles.statValue}>
+                                        {weeklyStats.total_workout_days || 0}
+                                    </Title>
+                                    <Paragraph style={styles.statLabel}>Total Workouts</Paragraph>
                                 </View>
                                 <View style={styles.statItem}>
-                                    <Paragraph style={styles.statLabel}>Avg Duration</Paragraph>
-                                    <Title>{weeklyStats.avg_duration || 0} min</Title>
+                                    <Title style={styles.statValue}>
+                                        {weeklyStats.average_duration ? Math.round(weeklyStats.average_duration) : 0}
+                                    </Title>
+                                    <Paragraph style={styles.statLabel}>Avg Duration (min)</Paragraph>
+                                </View>
+                            </View>
+                            <View style={styles.additionalStats}>
+                                <View style={styles.additionalStatItem}>
+                                    <Text style={styles.additionalStatLabel}>Success Rate: </Text>
+                                    <Text style={styles.additionalStatValue}>
+                                        {weeklyStats.workout_percentage || 0}%
+                                    </Text>
+                                </View>
+                                <View style={styles.additionalStatItem}>
+                                    <Text style={styles.additionalStatLabel}>Most Common: </Text>
+                                    <Text style={styles.additionalStatValue}>
+                                        {weeklyStats.most_common_type || 'N/A'}
+                                    </Text>
                                 </View>
                             </View>
                         </Card.Content>
@@ -142,24 +168,29 @@ export default function WorkoutTrackerScreen() {
 
                 {/* Workouts List */}
                 <View style={styles.listContainer}>
-                    <Title style={styles.listTitle}>Recent Workouts</Title>
+                    <Title style={styles.listTitle}>
+                        Recent Workouts ({workouts.length})
+                    </Title>
                     {workouts.length === 0 ? (
                         <Card style={styles.emptyCard}>
                             <Card.Content>
                                 <Paragraph style={styles.emptyText}>
-                                    No workouts logged yet. Start tracking your fitness journey!
+                                    💪 No workouts logged yet!{'\n'}
+                                    Start tracking your fitness journey!
                                 </Paragraph>
                             </Card.Content>
                         </Card>
                     ) : (
-                        workouts.map((workout) => (
-                            <WorkoutCard
-                                key={workout.id}
-                                workout={workout}
-                                onEdit={() => handleEditWorkout(workout)}
-                                onDelete={() => handleDeleteWorkout(workout.id)}
-                            />
-                        ))
+                        workouts
+                            .sort((a, b) => new Date(b.date) - new Date(a.date)) // Sort by date descending
+                            .map((workout) => (
+                                <WorkoutCard
+                                    key={workout.date}
+                                    workout={workout}
+                                    onEdit={() => handleEditWorkout(workout)}
+                                    onDelete={() => handleDeleteWorkout(workout.date)}
+                                />
+                            ))
                     )}
                 </View>
             </ScrollView>
@@ -168,6 +199,7 @@ export default function WorkoutTrackerScreen() {
             <FAB
                 style={styles.fab}
                 icon="plus"
+                label="Log Workout"
                 onPress={handleAddWorkout}
                 color="#fff"
             />
@@ -175,7 +207,7 @@ export default function WorkoutTrackerScreen() {
             {/* Workout Form Modal */}
             <WorkoutFormModal
                 visible={modalVisible}
-                workout={editingWorkout}
+                entry={editingWorkout}
                 onClose={() => setModalVisible(false)}
                 onSave={handleSaveWorkout}
             />
@@ -186,34 +218,69 @@ export default function WorkoutTrackerScreen() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#f5f5f5',
+        backgroundColor: '#F8F9FA',
     },
     centerContainer: {
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
-        backgroundColor: '#f5f5f5',
+        backgroundColor: '#F8F9FA',
     },
     loadingText: {
         marginTop: 10,
         fontSize: 16,
-        color: '#666',
+        color: '#6C757D',
     },
     statsCard: {
         margin: 15,
-        elevation: 3,
+        elevation: 4,
+        backgroundColor: '#4A90E2',
+        borderRadius: 12,
+    },
+    cardTitle: {
+        color: '#FFFFFF',
+        fontSize: 20,
+        fontWeight: 'bold',
     },
     statsRow: {
         flexDirection: 'row',
         justifyContent: 'space-around',
-        marginTop: 10,
+        marginTop: 15,
+        marginBottom: 10,
     },
     statItem: {
         alignItems: 'center',
     },
+    statValue: {
+        fontSize: 32,
+        fontWeight: 'bold',
+        color: '#FFFFFF',
+    },
     statLabel: {
         fontSize: 12,
-        color: '#666',
+        color: '#FFFFFF',
+        marginTop: 5,
+        textAlign: 'center',
+    },
+    additionalStats: {
+        marginTop: 15,
+        paddingTop: 15,
+        borderTopWidth: 1,
+        borderTopColor: 'rgba(255, 255, 255, 0.3)',
+    },
+    additionalStatItem: {
+        flexDirection: 'row',
+        justifyContent: 'center',
+        marginBottom: 8,
+    },
+    additionalStatLabel: {
+        fontSize: 14,
+        color: '#FFFFFF',
+    },
+    additionalStatValue: {
+        fontSize: 14,
+        fontWeight: 'bold',
+        color: '#FFFFFF',
     },
     listContainer: {
         padding: 15,
@@ -221,19 +288,25 @@ const styles = StyleSheet.create({
     listTitle: {
         fontSize: 20,
         fontWeight: 'bold',
-        marginBottom: 10,
+        marginBottom: 15,
+        color: '#212529',
     },
     emptyCard: {
         marginTop: 20,
+        backgroundColor: '#FFFFFF',
+        elevation: 2,
+        borderRadius: 8,
     },
     emptyText: {
         textAlign: 'center',
-        color: '#666',
+        color: '#6C757D',
+        fontSize: 16,
+        lineHeight: 24,
     },
     fab: {
         position: 'absolute',
         right: 20,
         bottom: 20,
-        backgroundColor: '#2196F3',
+        backgroundColor: '#4A90E2',
     },
 });

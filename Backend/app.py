@@ -47,8 +47,14 @@ def on_startup():
 	# Skip database initialization during testing
 	if not os.getenv("TESTING"):
 		logging.getLogger("uvicorn").info("Starting up application")
-		# Initialize DB (creates tables for imported models)
-		init_db()
+		# Try to initialize DB (creates tables for imported models)
+		# If database doesn't exist yet, log warning but continue
+		try:
+			init_db()
+			logging.getLogger("uvicorn").info("Database tables initialized successfully")
+		except Exception as e:
+			logging.getLogger("uvicorn").warning(f"Database initialization skipped: {e}")
+			logging.getLogger("uvicorn").warning("You may need to create the database using POST /db/create_database")
 
 
 @app.on_event("shutdown")

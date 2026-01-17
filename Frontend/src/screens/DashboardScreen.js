@@ -1,25 +1,20 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
+import { useFocusEffect } from '@react-navigation/native';
 import {
     View,
     ScrollView,
     StyleSheet,
     RefreshControl,
-    Dimensions,
     Text,
     ActivityIndicator,
 } from 'react-native';
 import { Card, Title, Paragraph } from 'react-native-paper';
-import { LineChart } from 'react-native-chart-kit';
 import { dashboardApi } from '../services/api';
 import KPICard from '../components/KPICard';
 import ErrorMessage from '../components/ErrorMessage';
 
-const screenWidth = Dimensions.get('window').width;
-
 export default function DashboardScreen() {
-    const [kpis, setKpis] = useState(null);
-    const [weeklyProgress, setWeeklyProgress] = useState(null);
-    const [trends, setTrends] = useState(null);
+    const [dashboardData, setDashboardData] = useState(null);
     const [loading, setLoading] = useState(true);
     const [refreshing, setRefreshing] = useState(false);
     const [error, setError] = useState(null);
@@ -27,27 +22,22 @@ export default function DashboardScreen() {
     const fetchDashboardData = async () => {
         try {
             setError(null);
-            const [kpisResponse, weeklyResponse, trendsResponse] = await Promise.all([
-                dashboardApi.getKPIs(),
-                dashboardApi.getWeeklyProgress(),
-                dashboardApi.getTrends(),
-            ]);
-
-            setKpis(kpisResponse.data);
-            setWeeklyProgress(weeklyResponse.data);
-            setTrends(trendsResponse.data);
+            const response = await dashboardApi.getDashboard();
+            setDashboardData(response.data);
         } catch (err) {
+            console.error('Dashboard Error:', err);
             setError(err.message || 'Failed to load dashboard data');
-            console.error('Dashboard error:', err);
         } finally {
             setLoading(false);
             setRefreshing(false);
         }
     };
 
-    useEffect(() => {
-        fetchDashboardData();
-    }, []);
+    useFocusEffect(
+        React.useCallback(() => {
+            fetchDashboardData();
+        }, [])
+    );
 
     const onRefresh = () => {
         setRefreshing(true);
@@ -57,7 +47,7 @@ export default function DashboardScreen() {
     if (loading) {
         return (
             <View style={styles.centerContainer}>
-                <ActivityIndicator size="large" color="#2196F3" />
+                <ActivityIndicator size="large" color="#4A90E2" />
                 <Text style={styles.loadingText}>Loading dashboard...</Text>
             </View>
         );
@@ -72,6 +62,9 @@ export default function DashboardScreen() {
         );
     }
 
+    const workout = dashboardData?.workout || {};
+    const smoking = dashboardData?.smoking || {};
+
     return (
         <ScrollView
             style={styles.container}
@@ -83,91 +76,130 @@ export default function DashboardScreen() {
             <View style={styles.section}>
                 <Title style={styles.sectionTitle}>Key Performance Indicators</Title>
                 <View style={styles.kpiGrid}>
-                    {kpis && (
-                        <>
-                            <KPICard
-                                title="Workout Streak"
-                                value={`${kpis.workout_streak} days`}
-                                icon="fire"
-                                color="#FF5722"
-                            />
-                            <KPICard
-                                title="Smoke-Free Days"
-                                value={`${kpis.smoke_free_days} days`}
-                                icon="smoking-off"
-                                color="#4CAF50"
-                            />
-                            <KPICard
-                                title="Total Workouts"
-                                value={kpis.total_workouts}
-                                icon="dumbbell"
-                                color="#2196F3"
-                            />
-                            <KPICard
-                                title="Avg Workout Time"
-                                value={`${kpis.avg_workout_duration} min`}
-                                icon="timer"
-                                color="#9C27B0"
-                            />
-                        </>
-                    )}
+                    <KPICard
+                        title="Workout Streak"
+                        value={`${workout.current_streak || 0} days`}
+                        icon="fire"
+                        color="#FF6B6B"
+                    />
+                    <KPICard
+                        title="Smoke-Free Days"
+                        value={`${smoking.current_clean_streak || 0} days`}
+                        icon="smoking-off"
+                        color="#51CF66"
+                    />
+                    <KPICard
+                        title="Total Workouts"
+                        value={workout.total_workout_days || 0}
+                        icon="dumbbell"
+                        color="#4A90E2"
+                    />
+                    <KPICard
+                        title="Avg Workout Time"
+                        value={workout.average_duration ? `${Math.round(workout.average_duration)} min` : 'N/A'}
+                        icon="timer"
+                        color="#9775FA"
+                    />
                 </View>
             </View>
 
-            {/* Weekly Progress Section */}
-            {weeklyProgress && weeklyProgress.labels && weeklyProgress.labels.length > 0 && (
-                <View style={styles.section}>
-                    <Card style={styles.card}>
-                        <Card.Content>
-                            <Title>Weekly Workout Progress</Title>
-                            <LineChart
-                                data={{
-                                    labels: weeklyProgress.labels,
-                                    datasets: [{
-                                        data: weeklyProgress.workouts || [0],
-                                    }],
-                                }}
-                                width={screenWidth - 60}
-                                height={220}
-                                chartConfig={{
-                                    backgroundColor: '#ffffff',
-                                    backgroundGradientFrom: '#ffffff',
-                                    backgroundGradientTo: '#ffffff',
-                                    decimalPlaces: 0,
-                                    color: (opacity = 1) => `rgba(33, 150, 243, ${opacity})`,
-                                    labelColor: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
-                                    style: {
-                                        borderRadius: 16,
-                                    },
-                                    propsForDots: {
-                                        r: '6',
-                                        strokeWidth: '2',
-                                        stroke: '#2196F3',
-                                    },
-                                }}
-                                bezier
-                                style={styles.chart}
-                            />
-                        </Card.Content>
-                    </Card>
-                </View>
-            )}
-
-            {/* Trends Section */}
-            {trends && (
-                <View style={styles.section}>
-                    <Card style={styles.card}>
-                        <Card.Content>
-                            <Title>Monthly Trends</Title>
-                            <View style={styles.trendItem}>
-                                <Paragraph>Workout Trend: {trends.workout_trend}%</Paragraph>
-                                <Paragraph>Smoking Reduction: {trends.smoking_reduction}%</Paragraph>
-                                <Paragraph>Consistency Score: {trends.consistency_score}%</Paragraph>
+            {/* Workout Statistics */}
+            <View style={styles.section}>
+                <Card style={styles.workoutCard}>
+                    <Card.Content>
+                        <Title style={styles.cardTitle}>Workout Statistics</Title>
+                        <View style={styles.statRow}>
+                            <View style={styles.statItem}>
+                                <Text style={styles.statEmoji}>🔥</Text>
+                                <Text style={styles.statLabel}>Current Streak</Text>
+                                <Text style={styles.statValue}>{workout.current_streak || 0} days</Text>
                             </View>
-                        </Card.Content>
-                    </Card>
-                </View>
-            )}
+                            <View style={styles.statItem}>
+                                <Text style={styles.statEmoji}>🏆</Text>
+                                <Text style={styles.statLabel}>Longest Streak</Text>
+                                <Text style={styles.statValue}>{workout.longest_streak || 0} days</Text>
+                            </View>
+                        </View>
+                        <View style={styles.statRow}>
+                            <View style={styles.statItem}>
+                                <Text style={styles.statEmoji}>📅</Text>
+                                <Text style={styles.statLabel}>Days Tracked</Text>
+                                <Text style={styles.statValue}>{workout.total_days || 0}</Text>
+                            </View>
+                            <View style={styles.statItem}>
+                                <Text style={styles.statEmoji}>✅</Text>
+                                <Text style={styles.statLabel}>Success Rate</Text>
+                                <Text style={styles.statValue}>{workout.workout_percentage || 0}%</Text>
+                            </View>
+                        </View>
+                        <View style={styles.singleStatRow}>
+                            <Text style={styles.statEmoji}>💪</Text>
+                            <Text style={styles.statLabel}>Most Common Type: </Text>
+                            <Text style={styles.statValueInline}>{workout.most_common_type || 'N/A'}</Text>
+                        </View>
+                    </Card.Content>
+                </Card>
+            </View>
+
+            {/* Smoking Statistics */}
+            <View style={styles.section}>
+                <Card style={styles.smokingCard}>
+                    <Card.Content>
+                        <Title style={styles.cardTitle}>Smoking Statistics</Title>
+                        <View style={styles.statRow}>
+                            <View style={styles.statItem}>
+                                <Text style={styles.statEmoji}>✨</Text>
+                                <Text style={styles.statLabel}>Clean Streak</Text>
+                                <Text style={styles.statValue}>{smoking.current_clean_streak || 0} days</Text>
+                            </View>
+                            <View style={styles.statItem}>
+                                <Text style={styles.statEmoji}>🏆</Text>
+                                <Text style={styles.statLabel}>Best Streak</Text>
+                                <Text style={styles.statValue}>{smoking.longest_clean_streak || 0} days</Text>
+                            </View>
+                        </View>
+                        <View style={styles.statRow}>
+                            <View style={styles.statItem}>
+                                <Text style={styles.statEmoji}>⚠️</Text>
+                                <Text style={styles.statLabel}>Total Relapses</Text>
+                                <Text style={styles.statValue}>{smoking.total_relapses || 0}</Text>
+                            </View>
+                            <View style={styles.statItem}>
+                                <Text style={styles.statEmoji}>🚬</Text>
+                                <Text style={styles.statLabel}>Cigarettes</Text>
+                                <Text style={styles.statValue}>{smoking.total_cigarettes || 0}</Text>
+                            </View>
+                        </View>
+                        <View style={styles.singleStatRow}>
+                            <Text style={styles.statEmoji}>📍</Text>
+                            <Text style={styles.statLabel}>Common Location: </Text>
+                            <Text style={styles.statValueInline}>{smoking.most_common_location || 'N/A'}</Text>
+                        </View>
+                    </Card.Content>
+                </Card>
+            </View>
+
+            {/* Monthly Trends */}
+            <View style={styles.section}>
+                <Card style={styles.trendsCard}>
+                    <Card.Content>
+                        <Title style={styles.cardTitle}>Monthly Trends</Title>
+                        <View style={styles.trendItem}>
+                            <Text style={styles.comingSoon}>📊 Detailed trends coming soon!</Text>
+                            <Text style={styles.trendFeature}>• Workout consistency over time</Text>
+                            <Text style={styles.trendFeature}>• Smoking reduction progress</Text>
+                            <Text style={styles.trendFeature}>• Weekly performance charts</Text>
+                        </View>
+                    </Card.Content>
+                </Card>
+            </View>
+
+            {/* Last Updated */}
+            <View style={styles.section}>
+                <Text style={styles.lastUpdated}>
+                    Last updated: {dashboardData?.last_updated || 'N/A'}
+                </Text>
+            </View>
         </ScrollView>
     );
 }
@@ -175,41 +207,124 @@ export default function DashboardScreen() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#f5f5f5',
+        backgroundColor: '#F8F9FA',
     },
     centerContainer: {
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
-        backgroundColor: '#f5f5f5',
+        backgroundColor: '#F8F9FA',
     },
     loadingText: {
         marginTop: 10,
         fontSize: 16,
-        color: '#666',
+        color: '#6C757D',
     },
     section: {
         padding: 15,
     },
     sectionTitle: {
-        fontSize: 20,
+        fontSize: 22,
         fontWeight: 'bold',
-        marginBottom: 10,
+        marginBottom: 15,
+        color: '#212529',
     },
     kpiGrid: {
         flexDirection: 'row',
         flexWrap: 'wrap',
         justifyContent: 'space-between',
     },
-    card: {
+    workoutCard: {
         marginBottom: 15,
-        elevation: 3,
+        elevation: 4,
+        backgroundColor: '#FFFFFF',
+        borderLeftWidth: 4,
+        borderLeftColor: '#4A90E2',
+        borderRadius: 12,
     },
-    chart: {
-        marginVertical: 8,
-        borderRadius: 16,
+    smokingCard: {
+        marginBottom: 15,
+        elevation: 4,
+        backgroundColor: '#FFFFFF',
+        borderLeftWidth: 4,
+        borderLeftColor: '#51CF66',
+        borderRadius: 12,
+    },
+    trendsCard: {
+        marginBottom: 15,
+        elevation: 4,
+        backgroundColor: '#FFFFFF',
+        borderLeftWidth: 4,
+        borderLeftColor: '#9775FA',
+        borderRadius: 12,
+    },
+    cardTitle: {
+        fontSize: 18,
+        fontWeight: 'bold',
+        color: '#212529',
+        marginBottom: 15,
+    },
+    statRow: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        marginBottom: 15,
+    },
+    statItem: {
+        flex: 1,
+        alignItems: 'center',
+        padding: 10,
+        backgroundColor: '#F8F9FA',
+        borderRadius: 8,
+        marginHorizontal: 5,
+    },
+    statEmoji: {
+        fontSize: 24,
+        marginBottom: 5,
+    },
+    statLabel: {
+        fontSize: 12,
+        color: '#6C757D',
+        marginBottom: 5,
+        textAlign: 'center',
+    },
+    statValue: {
+        fontSize: 18,
+        fontWeight: 'bold',
+        color: '#212529',
+    },
+    singleStatRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: 10,
+        backgroundColor: '#F8F9FA',
+        borderRadius: 8,
+    },
+    statValueInline: {
+        fontSize: 14,
+        fontWeight: 'bold',
+        color: '#4A90E2',
     },
     trendItem: {
         marginTop: 10,
+    },
+    comingSoon: {
+        fontWeight: 'bold',
+        marginBottom: 15,
+        color: '#4A90E2',
+        fontSize: 16,
+        textAlign: 'center',
+    },
+    trendFeature: {
+        fontSize: 14,
+        color: '#6C757D',
+        marginBottom: 8,
+        paddingLeft: 10,
+    },
+    lastUpdated: {
+        textAlign: 'center',
+        color: '#999',
+        fontSize: 12,
+        marginBottom: 20,
     },
 });

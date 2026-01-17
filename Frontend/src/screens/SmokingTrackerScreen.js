@@ -17,7 +17,6 @@ import ErrorMessage from '../components/ErrorMessage';
 export default function SmokingTrackerScreen() {
     const [entries, setEntries] = useState([]);
     const [streakInfo, setStreakInfo] = useState(null);
-    const [weeklyStats, setWeeklyStats] = useState(null);
     const [loading, setLoading] = useState(true);
     const [refreshing, setRefreshing] = useState(false);
     const [error, setError] = useState(null);
@@ -27,15 +26,16 @@ export default function SmokingTrackerScreen() {
     const fetchSmokingData = async () => {
         try {
             setError(null);
-            const [entriesResponse, streakResponse, statsResponse] = await Promise.all([
+            const [entriesResponse, dashboardResponse] = await Promise.all([
                 smokingApi.getAllEntries(),
-                smokingApi.getStreakInfo(),
-                smokingApi.getWeeklyStats(),
+                smokingApi.getStreakInfo(), // Gets dashboard data with smoking stats
             ]);
 
             setEntries(entriesResponse.data);
-            setStreakInfo(streakResponse.data);
-            setWeeklyStats(statsResponse.data);
+            // Dashboard returns both workout and smoking data
+            if (dashboardResponse.data.smoking) {
+                setStreakInfo(dashboardResponse.data.smoking);
+            }
         } catch (err) {
             setError(err.message || 'Failed to load smoking data');
             console.error('Smoking fetch error:', err);
@@ -88,22 +88,21 @@ export default function SmokingTrackerScreen() {
 
     const handleSaveEntry = async (entryData) => {
         try {
-            if (editingEntry) {
-                await smokingApi.updateEntry(editingEntry.id, entryData);
-            } else {
-                await smokingApi.logEntry(entryData);
-            }
+            // Use upsert endpoint for both create and update
+            await smokingApi.upsertEntry(entryData);
             setModalVisible(false);
+            setEditingEntry(null);
             fetchSmokingData();
         } catch (err) {
-            Alert.alert('Error', 'Failed to save entry');
+            console.error('Save smoking entry error:', err);
+            Alert.alert('Error', 'Failed to save smoking entry');
         }
     };
 
     if (loading) {
         return (
             <View style={styles.centerContainer}>
-                <ActivityIndicator size="large" color="#2196F3" />
+                <ActivityIndicator size="large" color="#51CF66" />
                 <Text style={styles.loadingText}>Loading smoking data...</Text>
             </View>
         );
@@ -124,39 +123,36 @@ export default function SmokingTrackerScreen() {
                 {streakInfo && (
                     <Card style={styles.streakCard}>
                         <Card.Content>
-                            <Title>🎯 Smoke-Free Journey</Title>
+                            <Title style={styles.cardTitle}>🎯 Smoke-Free Journey</Title>
                             <View style={styles.streakRow}>
                                 <View style={styles.streakItem}>
-                                    <Title style={styles.streakValue}>{streakInfo.current_streak || 0}</Title>
-                                    <Paragraph style={styles.streakLabel}>Current Streak (days)</Paragraph>
+                                    <Title style={styles.streakValue}>
+                                        {streakInfo.current_clean_streak || 0}
+                                    </Title>
+                                    <Paragraph style={styles.streakLabel}>Current Clean Streak</Paragraph>
                                 </View>
                                 <View style={styles.streakItem}>
-                                    <Title style={styles.streakValue}>{streakInfo.longest_streak || 0}</Title>
-                                    <Paragraph style={styles.streakLabel}>Longest Streak</Paragraph>
+                                    <Title style={styles.streakValue}>
+                                        {streakInfo.longest_clean_streak || 0}
+                                    </Title>
+                                    <Paragraph style={styles.streakLabel}>Best Streak</Paragraph>
                                 </View>
                             </View>
-                        </Card.Content>
-                    </Card>
-                )}
-
-                {/* Weekly Stats Card */}
-                {weeklyStats && (
-                    <Card style={styles.statsCard}>
-                        <Card.Content>
-                            <Title>This Week's Summary</Title>
-                            <View style={styles.statsRow}>
-                                <View style={styles.statItem}>
-                                    <Paragraph style={styles.statLabel}>Total Smoked</Paragraph>
-                                    <Title>{weeklyStats.total_smoked || 0}</Title>
+                            <View style={styles.additionalStats}>
+                                <View style={styles.statBox}>
+                                    <Text style={styles.statNumber}>{streakInfo.total_relapses || 0}</Text>
+                                    <Text style={styles.statText}>Total Relapses</Text>
                                 </View>
-                                <View style={styles.statItem}>
-                                    <Paragraph style={styles.statLabel}>Daily Average</Paragraph>
-                                    <Title>{weeklyStats.daily_average || 0}</Title>
+                                <View style={styles.statBox}>
+                                    <Text style={styles.statNumber}>{streakInfo.total_cigarettes || 0}</Text>
+                                    <Text style={styles.statText}>Total Cigarettes</Text>
                                 </View>
-                                <View style={styles.statItem}>
-                                    <Paragraph style={styles.statLabel}>Entries</Paragraph>
-                                    <Title>{weeklyStats.total_entries || 0}</Title>
-                                </View>
+                                {streakInfo.most_common_location && (
+                                    <View style={styles.statBox}>
+                                        <Text style={styles.statNumber}>📍</Text>
+                                        <Text style={styles.statText}>{streakInfo.most_common_location}</Text>
+                                    </View>
+                                )}
                             </View>
                         </Card.Content>
                     </Card>
@@ -164,22 +160,25 @@ export default function SmokingTrackerScreen() {
 
                 {/* Entries List */}
                 <View style={styles.listContainer}>
-                    <Title style={styles.listTitle}>Recent Entries</Title>
+                    <Title style={styles.listTitle}>
+                        Recent Entries ({entries.length})
+                    </Title>
                     {entries.length === 0 ? (
                         <Card style={styles.emptyCard}>
                             <Card.Content>
                                 <Paragraph style={styles.emptyText}>
-                                    No entries yet. Start tracking your smoke-free journey!
+                                    🎉 No smoking entries yet!{'\n'}
+                                    Keep up the great work on your smoke-free journey!
                                 </Paragraph>
                             </Card.Content>
                         </Card>
                     ) : (
                         entries.map((entry) => (
                             <SmokingCard
-                                key={entry.id}
+                                key={entry.date}
                                 entry={entry}
                                 onEdit={() => handleEditEntry(entry)}
-                                onDelete={() => handleDeleteEntry(entry.id)}
+                                onDelete={() => handleDeleteEntry(entry.date)}
                             />
                         ))
                     )}
@@ -190,6 +189,7 @@ export default function SmokingTrackerScreen() {
             <FAB
                 style={styles.fab}
                 icon="plus"
+                label="Log Relapse"
                 onPress={handleAddEntry}
                 color="#fff"
             />
@@ -200,6 +200,7 @@ export default function SmokingTrackerScreen() {
                 entry={editingEntry}
                 onClose={() => setModalVisible(false)}
                 onSave={handleSaveEntry}
+                currentStreak={streakInfo?.current_clean_streak || 0}
             />
         </View>
     );
@@ -208,58 +209,70 @@ export default function SmokingTrackerScreen() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#f5f5f5',
+        backgroundColor: '#F8F9FA',
     },
     centerContainer: {
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
-        backgroundColor: '#f5f5f5',
+        backgroundColor: '#F8F9FA',
     },
     loadingText: {
         marginTop: 10,
         fontSize: 16,
-        color: '#666',
+        color: '#6C757D',
     },
     streakCard: {
         margin: 15,
-        elevation: 3,
-        backgroundColor: '#4CAF50',
+        elevation: 4,
+        backgroundColor: '#51CF66',
+        borderRadius: 12,
+    },
+    cardTitle: {
+        color: '#FFFFFF',
+        fontSize: 20,
+        fontWeight: 'bold',
     },
     streakRow: {
         flexDirection: 'row',
         justifyContent: 'space-around',
         marginTop: 15,
+        marginBottom: 10,
     },
     streakItem: {
         alignItems: 'center',
     },
     streakValue: {
-        fontSize: 32,
+        fontSize: 36,
         fontWeight: 'bold',
-        color: '#fff',
+        color: '#FFFFFF',
     },
     streakLabel: {
-        fontSize: 12,
-        color: '#fff',
+        fontSize: 13,
+        color: '#FFFFFF',
         marginTop: 5,
+        textAlign: 'center',
     },
-    statsCard: {
-        marginHorizontal: 15,
-        marginBottom: 15,
-        elevation: 3,
-    },
-    statsRow: {
+    additionalStats: {
         flexDirection: 'row',
         justifyContent: 'space-around',
-        marginTop: 10,
+        marginTop: 15,
+        paddingTop: 15,
+        borderTopWidth: 1,
+        borderTopColor: 'rgba(255, 255, 255, 0.3)',
     },
-    statItem: {
+    statBox: {
         alignItems: 'center',
     },
-    statLabel: {
-        fontSize: 12,
-        color: '#666',
+    statNumber: {
+        fontSize: 20,
+        fontWeight: 'bold',
+        color: '#FFFFFF',
+    },
+    statText: {
+        fontSize: 11,
+        color: '#FFFFFF',
+        marginTop: 3,
     },
     listContainer: {
         padding: 15,
@@ -267,19 +280,25 @@ const styles = StyleSheet.create({
     listTitle: {
         fontSize: 20,
         fontWeight: 'bold',
-        marginBottom: 10,
+        marginBottom: 15,
+        color: '#212529',
     },
     emptyCard: {
         marginTop: 20,
+        backgroundColor: '#FFFFFF',
+        elevation: 2,
+        borderRadius: 8,
     },
     emptyText: {
         textAlign: 'center',
-        color: '#666',
+        color: '#6C757D',
+        fontSize: 16,
+        lineHeight: 24,
     },
     fab: {
         position: 'absolute',
         right: 20,
         bottom: 20,
-        backgroundColor: '#2196F3',
+        backgroundColor: '#51CF66',
     },
 });

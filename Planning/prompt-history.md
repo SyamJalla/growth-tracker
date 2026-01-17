@@ -622,6 +622,132 @@ A chronological record of all prompts and interactions used to build this projec
 
 ---
 
+## 2026-01-13 - Session 4: Historical Date Support & Upsert Implementation
+
+### 41. Historical Date Requirements Discussion
+**Prompt:** "now application allows user to add an update for workout and smoking for the current date. i would like to add an update for historical dates too. let me know what all points we need to consider here before moving ahead with development"  
+**Outcome:**
+- Analyzed current implementation (backend already supports historical dates)
+- Identified 8 key considerations:
+  1. Date range validation (2026 only vs unlimited)
+  2. Streak calculation impact (recalculate dynamically)
+  3. Data entry experience (check existing entries)
+  4. Validation rules (backend + frontend)
+  5. UI/UX improvements needed
+  6. Backend modifications (upsert endpoint)
+  7. Smoking tracker warning (critical for streak)
+  8. Edge cases (timezone, conflicts, gaps)
+- Presented 4 upsert implementation options
+- Recommended Option 2: Add upsert endpoints, keep existing POST/PUT  
+**Category:** Planning, Requirements Analysis
+
+---
+
+### 42. Upsert Implementation Discussion
+**Prompt:** "Future dates: Allow or block? Recommend: Block --- agree; Date range: 2026 only or unlimited? Recommend: 2026 only per spec -- yes only 2026; Time tracking: Keep time picker or remove? Recommend: Remove (not used) -- agree; Smoking clean streak: Warn user before adding historical smoking entry? Recommend: Yes, critical -- agree; Upsert behavior: Auto-update if exists or keep separate POST/PUT? Recommend: Add upsert ;ets discuss more about this"  
+**Outcome:**
+- User confirmed all recommendations
+- Deep dive into upsert implementation
+- Compared 4 options:
+  * Option 1: Frontend handles check (extra API call)
+  * Option 2: Backend upsert endpoint (recommended)
+  * Option 3: Upsert only (breaks REST)
+  * Option 4: Warning dialog (extra friction)
+- Decided: Option 2 - Add upsert, keep existing endpoints
+- Benefits: Single API call, no race conditions, better UX, backward compatible  
+**Category:** Architecture Decision, API Design
+
+---
+
+### 43. Implement Historical Date Support
+**Prompt:** "lets implement option 2"  
+**Outcome:**
+- ✅ Backend: Added upsert endpoints
+  * POST /api/workouts/upsert/ - Create or update by date
+  * POST /api/smoking/upsert/ - Create or update by date
+  * Atomic operations, no race conditions
+- ✅ Frontend: Updated API service
+  * Added workoutApi.upsertWorkout(data)
+  * Added smokingApi.upsertEntry(data)
+- ✅ WorkoutFormModal improvements
+  * Removed time picker (only date)
+  * Added date validation (2026 only, ≤ today)
+  * DateTimePicker min/max constraints
+  * Removed calories_burned field
+  * Fixed intensity label
+- ✅ SmokingFormModal improvements
+  * Removed time picker
+  * Added date validation
+  * Added streak warning banner (shows current streak)
+  * Removed mood/triggers (not in schema)
+  * Simplified to match backend fields
+- ✅ WorkoutTrackerScreen: Updated to use upsert
+- ✅ SmokingTrackerScreen: Updated to use upsert, pass currentStreak
+- All validation: dates within 2026, no future entries
+- No errors detected in implementation  
+**Files Modified:**
+- Backend/api/workout_tracker.py
+- Backend/api/smoking_tracker.py
+- Frontend/src/services/api.js
+- Frontend/src/components/WorkoutFormModal.js
+- Frontend/src/components/SmokingFormModal.js
+- Frontend/src/screens/WorkoutTrackerScreen.js
+- Frontend/src/screens/SmokingTrackerScreen.js  
+**Category:** Feature Implementation, Backend API, Frontend UI
+
+---
+
+### 44. Documentation and Configuration Updates
+**Prompt:** "i would like you to do couple of updates before me testing everything. first, update planning folder accordingly in the same existing format. update readme file of project with all the updates done. update the documentation and postman collection too with all the changes done also check for if any other configurations needs to be changed?"  
+**Outcome:**
+- ✅ Updated Planning/plan.txt with VERSION 2.2
+  * Complete historical date support documentation
+  * Upsert endpoint specifications
+  * Date validation rules
+  * Streak warning system details
+  * Design decisions and rationale
+  * Testing checklist
+  * Migration notes
+- ✅ Updated Planning/prompt-history.md (this file)
+  * Added Session 4 entries (prompts 41-44)
+  * Updated summary statistics
+  * Added historical date support decisions
+- 🔄 Updating README.md with new features
+- 🔄 Updating API-Documentation.md with upsert endpoints
+- 🔄 Updating Postman collection
+- 🔄 Checking configurations  
+**Files Modified:**
+- Planning/plan.txt (VERSION 2.2 added)
+- Planning/prompt-history.md (Session 4 added)
+- README.md (in progress)
+- Backend/api-docs/API-Documentation.md (in progress)
+- Backend/api-docs/growth-tracker.postman_collection.json (in progress)  
+**Category:** Documentation, Configuration
+
+---
+
+## Summary Statistics
+
+| Metric | Count |
+|--------|-------|
+| Total Sessions | 4 |
+| Total Prompts | 44 |
+| Files Created | 30+ |
+| Files Modified | 45+ |
+| Files Deleted | 10+ |
+| Major Versions | 3 (v1.0, v2.0, v2.2) |
+
+### Session Breakdown
+
+| Session | Date | Focus | Prompts | Files Modified |
+|---------|------|-------|---------|----------------|
+| 1 | 2026-01-13 | Backend Setup & Core Features | 26 | 25+ |
+| 2 | 2026-01-13 | Frontend Implementation | 3 | 13+ |
+| 3 | 2026-01-13 | Deployment & Troubleshooting | 11 | 6 |
+| 4 | 2026-01-13 | Historical Date Support | 4 | 12+ |
+
+---
+
 ## Key Decisions Made
 
 ### Backend Decisions (Session 1):
@@ -655,6 +781,14 @@ A chronological record of all prompts and interactions used to build this projec
 24. ✅ CORS allow all origins for development
 25. ✅ Date-based primary keys for workout/smoking entries
 26. ✅ Single dashboard endpoint returning all KPIs
+
+### Historical Date Support Decisions (Session 4):
+27. ✅ Add upsert endpoints (keep existing POST/PUT for compatibility)
+28. ✅ Date validation: 2026 only, no future dates
+29. ✅ Remove time pickers (date-only tracking)
+30. ✅ Smoking clean streak warning before adding entry
+31. ✅ Smart upsert operation (single call for create/update)
+32. ✅ DateTimePicker min/max constraints
 
 ---
 

@@ -20,7 +20,7 @@ def test_workout_streak_calculation_single_day(client, db_session):
     response = client.get("/api/dashboard")
     assert response.status_code == 200
     
-    stats = response.json()[\"workout\"]
+    stats = response.json()["workout"]
     assert stats["current_workout_streak"] == 1
     assert stats["longest_workout_streak"] == 1
 
@@ -41,7 +41,7 @@ def test_workout_streak_consecutive_days(client, db_session):
     response = client.get("/api/dashboard")
     assert response.status_code == 200
     
-    stats = response.json()[\"workout\"]
+    stats = response.json()["workout"]
     assert stats["longest_workout_streak"] >= 5
 
 
@@ -68,7 +68,7 @@ def test_workout_streak_broken(client, db_session):
     response = client.get("/api/dashboard")
     assert response.status_code == 200
     
-    stats = response.json()[\"workout\"]
+    stats = response.json()["workout"]
     # Longest streak should be 2 (Jan 10-11)
     assert stats["longest_workout_streak"] == 2
     # Current streak depends on today's date
@@ -97,7 +97,7 @@ def test_workout_completion_rate(client, db_session):
     response = client.get("/api/dashboard")
     assert response.status_code == 200
     
-    stats = response.json()[\"workout\"]
+    stats = response.json()["workout"]
     assert stats["total_workouts_completed"] == 3
     assert stats["total_workout_days"] == 4
     assert stats["workout_completion_rate"] == 75.0  # 3/4 = 75%
@@ -120,7 +120,7 @@ def test_workout_average_duration(client, db_session):
     response = client.get("/api/dashboard")
     assert response.status_code == 200
     
-    stats = response.json()[\"workout\"]
+    stats = response.json()["workout"]
     expected_avg = sum(durations) / len(durations)
     assert abs(stats["avg_duration_minutes"] - expected_avg) < 0.1
 
@@ -140,7 +140,7 @@ def test_smoking_streak_calculation_zero_days(client, db_session):
     response = client.get("/api/dashboard")
     assert response.status_code == 200
     
-    stats = response.json()[\"smoking\"]
+    stats = response.json()["smoking"]
     # All days are smoke-free
     assert stats["current_smoke_free_streak"] >= 3
 
@@ -166,7 +166,7 @@ def test_smoking_streak_with_relapses(client, db_session):
     response = client.get("/api/dashboard")
     assert response.status_code == 200
     
-    stats = response.json()[\"smoking\"]
+    stats = response.json()["smoking"]
     # Longest smoke-free streak should be 2 (Jan 11-12)
     assert stats["longest_smoke_free_streak"] == 2
     # Current streak is 0 because Jan 13 has cigarettes
@@ -189,7 +189,7 @@ def test_smoking_total_cigarettes(client, db_session):
     response = client.get("/api/dashboard")
     assert response.status_code == 200
     
-    stats = response.json()[\"smoking\"]
+    stats = response.json()["smoking"]
     assert stats["total_cigarettes"] == sum(counts)  # 16
 
 
@@ -208,7 +208,7 @@ def test_smoking_average_per_day(client, db_session):
     response = client.get("/api/dashboard")
     assert response.status_code == 200
     
-    stats = response.json()[\"smoking\"]
+    stats = response.json()["smoking"]
     expected_avg = sum(counts) / len(counts)  # 16 / 4 = 4.0
     assert abs(stats["avg_cigarettes_per_day"] - expected_avg) < 0.1
 
@@ -247,7 +247,7 @@ def test_workout_only_skipped_days(client, db_session):
     response = client.get("/api/dashboard")
     assert response.status_code == 200
     
-    stats = response.json()[\"workout\"]
+    stats = response.json()["workout"]
     assert stats["total_workouts_completed"] == 0
     assert stats["workout_completion_rate"] == 0.0
     assert stats["current_workout_streak"] == 0
@@ -294,6 +294,6 @@ def test_smoking_days_counting(client, db_session):
     response = client.get("/api/dashboard")
     assert response.status_code == 200
     
-    stats = response.json()[\"smoking\"]
+    stats = response.json()["smoking"]
     # Only 2 days had cigarettes (Jan 10 and Jan 12)
     assert stats["total_smoking_days"] == 2

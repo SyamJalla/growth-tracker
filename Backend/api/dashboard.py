@@ -59,8 +59,8 @@ def calculate_workout_stats(db: Session) -> WorkoutStats:
         )
     
     # Get last update date and calculate total days
-    last_update = workouts[-1].date
-    total_days = (last_update - YEAR_START).days + 1
+    last_entry_date = workouts[-1].date  # Jan 15
+    total_days = (last_entry_date - YEAR_START).days + 1  # 15 days
     
     # Filter only days where workout was done
     workout_dates = [w.date for w in workouts if w.workout_done]
@@ -69,20 +69,23 @@ def calculate_workout_stats(db: Session) -> WorkoutStats:
     
     # Calculate current streak (from end backwards)
     current_streak = 0
-    check_date = date.today()
+    last_entry_date = workouts[-1].date  # Jan 15 (last workout logged)
+    check_date = last_entry_date
+
     while check_date >= YEAR_START:
         if check_date in workout_dates:
             current_streak += 1
             check_date -= timedelta(days=1)
         else:
-            break
+            break  # Stops at first gap
     
     # Calculate longest streak
     longest_streak = 0
     current = 0
     check_date = YEAR_START
     
-    while check_date <= last_update:
+    # Now uses last_entry_date as the end point
+    while check_date <= last_entry_date:  # Not today
         if check_date in workout_dates:
             current += 1
             longest_streak = max(longest_streak, current)

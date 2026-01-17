@@ -1,8 +1,8 @@
 # Growth Tracker API Documentation
 
-**Version:** 1.0  
+**Version:** 2.2  
 **Base URL:** `http://localhost:8000`  
-**Last Updated:** January 13, 2026
+**Last Updated:** January 13, 2026 (VERSION 2.2 - Historical Date Support)
 
 ---
 
@@ -14,6 +14,9 @@
 4. [API Endpoints](#api-endpoints)
    - [Root Endpoint](#root-endpoint)
    - [Health Check](#health-check)
+   - [Dashboard](#dashboard)
+   - [Workout Tracker](#workout-tracker)
+   - [Smoking Tracker](#smoking-tracker)
    - [Database Setup](#database-setup)
 5. [Error Handling](#error-handling)
 6. [Data Models](#data-models)
@@ -28,10 +31,12 @@ The Growth Tracker API is a FastAPI-based backend service designed to track pers
 
 - ✅ Health check endpoints for application and database monitoring
 - ✅ Database initialization and management utilities
+- ✅ Dashboard with comprehensive KPIs (streaks, totals, percentages)
+- ✅ Workout tracker with CRUD operations
+- ✅ Smoking tracker with CRUD operations
+- ✅ Upsert endpoints for seamless historical data entry
 - ✅ RESTful API design
 - ✅ CORS support for cross-origin requests
-- 🔄 Smoking tracker (planned)
-- 🔄 Workout tracker (planned)
 
 ### Tech Stack
 
@@ -192,6 +197,440 @@ curl -X GET http://localhost:8000/api/health/db
 ```
 
 **Use Case:** Use this endpoint to monitor database connectivity. Ideal for health checks in container orchestration systems (Kubernetes, Docker Compose).
+
+---
+
+### Dashboard
+
+Get all KPIs and statistics in a single call.
+
+#### Get Dashboard Data
+
+Returns comprehensive statistics for both workout and smoking tracking.
+
+**Endpoint:** `GET /api/dashboard/`
+
+**Response (Success):**
+
+```json
+{
+  "workout": {
+    "current_streak": 5,
+    "longest_streak": 10,
+    "total_workout_days": 45,
+    "total_days": 13,
+    "workout_percentage": 34.6,
+    "average_duration": 52.3,
+    "most_common_type": "Push"
+  },
+  "smoking": {
+    "current_clean_streak": 7,
+    "total_relapses": 3,
+    "longest_clean_streak": 12,
+    "total_cigarettes": 15,
+    "most_common_location": "Social"
+  },
+  "last_updated": "2026-01-13"
+}
+```
+
+**Status Codes:**
+- `200 OK` - Dashboard data retrieved successfully
+
+**Example Request:**
+
+```bash
+curl -X GET http://localhost:8000/api/dashboard/
+```
+
+**Use Case:** Primary endpoint for mobile dashboard screen. Returns all calculated KPIs for calendar year 2026.
+
+---
+
+### Workout Tracker
+
+Endpoints for managing workout entries. Supports full CRUD operations plus smart upsert functionality.
+
+#### 1. Create Workout Entry
+
+Creates a new workout entry for a specific date. Returns error if entry already exists.
+
+**Endpoint:** `POST /api/workouts/`
+
+**Request Body:**
+
+```json
+{
+  "date": "2026-01-13",
+  "workout_type": "Push",
+  "workout_done": true,
+  "duration_minutes": 45,
+  "intensity": "High",
+  "notes": "Great session"
+}
+```
+
+**Response (Success):**
+
+```json
+{
+  "date": "2026-01-13",
+  "workout_type": "Push",
+  "workout_done": true,
+  "duration_minutes": 45,
+  "intensity": "High",
+  "notes": "Great session",
+  "created_at": "2026-01-13T10:30:00",
+  "updated_at": "2026-01-13T10:30:00"
+}
+```
+
+**Status Codes:**
+- `201 Created` - Entry created successfully
+- `400 Bad Request` - Entry already exists for this date
+
+---
+
+#### 2. Upsert Workout Entry (NEW in v2.2) ⭐
+
+Creates or updates workout entry for a specific date. Smart endpoint that automatically handles both create and update operations.
+
+**Endpoint:** `POST /api/workouts/upsert/`
+
+**Request Body:**
+
+```json
+{
+  "date": "2026-01-05",
+  "workout_type": "Pull",
+  "workout_done": true,
+  "duration_minutes": 60,
+  "intensity": "Moderate",
+  "notes": "Back and biceps"
+}
+```
+
+**Response (Success):**
+
+```json
+{
+  "date": "2026-01-05",
+  "workout_type": "Pull",
+  "workout_done": true,
+  "duration_minutes": 60,
+  "intensity": "Moderate",
+  "notes": "Back and biceps",
+  "created_at": "2026-01-05T09:00:00",
+  "updated_at": "2026-01-13T11:00:00"
+}
+```
+
+**Status Codes:**
+- `200 OK` - Entry created or updated successfully
+
+**Benefits:**
+- ✅ No duplicate entry errors
+- ✅ Single API call for all operations
+- ✅ Ideal for historical date entry
+- ✅ Idempotent (safe to retry)
+
+---
+
+#### 3. Get Workout Entry
+
+Retrieves workout entry for a specific date.
+
+**Endpoint:** `GET /api/workouts/{date}`
+
+**Path Parameters:**
+- `date` (string, required): Date in YYYY-MM-DD format
+
+**Response (Success):**
+
+```json
+{
+  "date": "2026-01-13",
+  "workout_type": "Push",
+  "workout_done": true,
+  "duration_minutes": 45,
+  "intensity": "High",
+  "notes": "Great session",
+  "created_at": "2026-01-13T10:30:00",
+  "updated_at": "2026-01-13T10:30:00"
+}
+```
+
+**Status Codes:**
+- `200 OK` - Entry found
+- `404 Not Found` - No entry for this date
+
+---
+
+#### 4. Update Workout Entry
+
+Updates existing workout entry for a specific date.
+
+**Endpoint:** `PUT /api/workouts/{date}`
+
+**Path Parameters:**
+- `date` (string, required): Date in YYYY-MM-DD format
+
+**Request Body:**
+
+```json
+{
+  "workout_type": "Legs",
+  "duration_minutes": 50,
+  "intensity": "High"
+}
+```
+
+**Response (Success):**
+
+```json
+{
+  "date": "2026-01-13",
+  "workout_type": "Legs",
+  "workout_done": true,
+  "duration_minutes": 50,
+  "intensity": "High",
+  "notes": "Great session",
+  "created_at": "2026-01-13T10:30:00",
+  "updated_at": "2026-01-13T15:00:00"
+}
+```
+
+**Status Codes:**
+- `200 OK` - Entry updated successfully
+- `404 Not Found` - No entry exists for this date
+
+---
+
+#### 5. Delete Workout Entry
+
+Deletes workout entry for a specific date.
+
+**Endpoint:** `DELETE /api/workouts/{date}`
+
+**Path Parameters:**
+- `date` (string, required): Date in YYYY-MM-DD format
+
+**Response (Success):** No content
+
+**Status Codes:**
+- `204 No Content` - Entry deleted successfully
+- `404 Not Found` - No entry exists for this date
+
+---
+
+#### 6. Get Workout History
+
+Retrieves list of all workout entries with optional date filtering.
+
+**Endpoint:** `GET /api/workouts/history/`
+
+**Query Parameters:**
+- `start_date` (string, optional): Filter from this date (YYYY-MM-DD)
+- `end_date` (string, optional): Filter until this date (YYYY-MM-DD)
+
+**Response (Success):**
+
+```json
+[
+  {
+    "date": "2026-01-13",
+    "workout_type": "Push",
+    "workout_done": true,
+    "duration_minutes": 45,
+    "intensity": "High",
+    "notes": "Great session",
+    "created_at": "2026-01-13T10:30:00",
+    "updated_at": "2026-01-13T10:30:00"
+  },
+  {
+    "date": "2026-01-12",
+    "workout_type": "Pull",
+    "workout_done": true,
+    "duration_minutes": 50,
+    "intensity": "Moderate",
+    "notes": null,
+    "created_at": "2026-01-12T09:00:00",
+    "updated_at": "2026-01-12T09:00:00"
+  }
+]
+```
+
+**Status Codes:**
+- `200 OK` - List retrieved successfully (may be empty)
+
+**Example Requests:**
+
+```bash
+# Get all workouts
+curl -X GET http://localhost:8000/api/workouts/history/
+
+# Get workouts for January 2026
+curl -X GET "http://localhost:8000/api/workouts/history/?start_date=2026-01-01&end_date=2026-01-31"
+```
+
+---
+
+### Smoking Tracker
+
+Endpoints for managing smoking entries. Each entry represents a relapse day.
+
+#### 1. Create Smoking Entry
+
+Creates a new smoking entry for a specific date. Returns error if entry already exists.
+
+**Endpoint:** `POST /api/smoking/`
+
+**Request Body:**
+
+```json
+{
+  "date": "2026-01-10",
+  "cigarette_count": 3,
+  "location": "Social",
+  "remarks": "Party with friends"
+}
+```
+
+**Response (Success):**
+
+```json
+{
+  "date": "2026-01-10",
+  "cigarette_count": 3,
+  "location": "Social",
+  "remarks": "Party with friends",
+  "created_at": "2026-01-10T20:00:00"
+}
+```
+
+**Status Codes:**
+- `201 Created` - Entry created successfully
+- `400 Bad Request` - Entry already exists for this date
+
+---
+
+#### 2. Upsert Smoking Entry (NEW in v2.2) ⭐
+
+Creates or updates smoking entry for a specific date. Recommended for all data entry operations.
+
+**Endpoint:** `POST /api/smoking/upsert/`
+
+**Request Body:**
+
+```json
+{
+  "date": "2026-01-10",
+  "cigarette_count": 5,
+  "location": "Work",
+  "remarks": "Stressful day"
+}
+```
+
+**Response (Success):**
+
+```json
+{
+  "date": "2026-01-10",
+  "cigarette_count": 5,
+  "location": "Work",
+  "remarks": "Stressful day",
+  "created_at": "2026-01-10T20:00:00"
+}
+```
+
+**Status Codes:**
+- `200 OK` - Entry created or updated successfully
+
+**Benefits:**
+- ✅ No duplicate entry errors
+- ✅ Single API call for all operations
+- ✅ Ideal for historical date entry
+- ✅ Clean streak recalculates automatically
+
+---
+
+#### 3. Get Smoking Entry
+
+Retrieves smoking entry for a specific date.
+
+**Endpoint:** `GET /api/smoking/{date}`
+
+**Path Parameters:**
+- `date` (string, required): Date in YYYY-MM-DD format
+
+**Response (Success):**
+
+```json
+{
+  "date": "2026-01-10",
+  "cigarette_count": 3,
+  "location": "Social",
+  "remarks": "Party with friends",
+  "created_at": "2026-01-10T20:00:00"
+}
+```
+
+**Status Codes:**
+- `200 OK` - Entry found
+- `404 Not Found` - No entry for this date
+
+---
+
+#### 4. Delete Smoking Entry
+
+Deletes smoking entry for a specific date.
+
+**Endpoint:** `DELETE /api/smoking/{date}`
+
+**Path Parameters:**
+- `date` (string, required): Date in YYYY-MM-DD format
+
+**Response (Success):** No content
+
+**Status Codes:**
+- `204 No Content` - Entry deleted successfully
+- `404 Not Found` - No entry exists for this date
+
+---
+
+#### 5. Get Smoking History
+
+Retrieves list of all smoking entries with optional date filtering.
+
+**Endpoint:** `GET /api/smoking/history/`
+
+**Query Parameters:**
+- `start_date` (string, optional): Filter from this date (YYYY-MM-DD)
+- `end_date` (string, optional): Filter until this date (YYYY-MM-DD)
+
+**Response (Success):**
+
+```json
+[
+  {
+    "date": "2026-01-10",
+    "cigarette_count": 3,
+    "location": "Social",
+    "remarks": "Party with friends",
+    "created_at": "2026-01-10T20:00:00"
+  },
+  {
+    "date": "2026-01-05",
+    "cigarette_count": 2,
+    "location": "Work",
+    "remarks": null,
+    "created_at": "2026-01-05T12:00:00"
+  }
+]
+```
+
+**Status Codes:**
+- `200 OK` - List retrieved successfully (may be empty)
 
 ---
 

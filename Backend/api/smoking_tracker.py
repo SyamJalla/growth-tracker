@@ -43,6 +43,29 @@ def create_smoking_entry(smoking: SmokingCreate, db: Session = Depends(get_db)):
     return db_smoking
 
 
+@router.post("/upsert/", response_model=SmokingResponse)
+def upsert_smoking_entry(smoking: SmokingCreate, db: Session = Depends(get_db)):
+    """Create or update smoking entry for a specific date (upsert operation)"""
+    # Check if entry already exists for this date
+    existing = db.query(SmokingEntry).filter(SmokingEntry.date == smoking.date).first()
+    
+    if existing:
+        # Update existing entry
+        update_data = smoking.dict(exclude={'date'})  # Don't update primary key
+        for key, value in update_data.items():
+            setattr(existing, key, value)
+        db.commit()
+        db.refresh(existing)
+        return existing
+    else:
+        # Create new entry
+        db_smoking = SmokingEntry(**smoking.dict())
+        db.add(db_smoking)
+        db.commit()
+        db.refresh(db_smoking)
+        return db_smoking
+
+
 @router.get("/{entry_date}", response_model=SmokingResponse)
 def get_smoking_entry(entry_date: date, db: Session = Depends(get_db)):
     """Get smoking entry for a specific date"""

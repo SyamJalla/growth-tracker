@@ -4,6 +4,8 @@ import {
     Modal,
     ScrollView,
     StyleSheet,
+    Alert,
+    Platform,
 } from 'react-native';
 import {
     TextInput,
@@ -13,50 +15,81 @@ import {
     Portal,
     Dialog,
     Chip,
+    Paragraph,
+    Banner,
 } from 'react-native-paper';
 import DateTimePicker from '@react-native-community/datetimepicker';
 
 const MOOD_OPTIONS = ['Happy', 'Neutral', 'Stressed', 'Anxious'];
 const TRIGGER_OPTIONS = ['Stress', 'Social', 'Boredom', 'Habit', 'Alcohol', 'Other'];
 
-export default function SmokingFormModal({ visible, entry, onClose, onSave }) {
+export default function SmokingFormModal({ visible, entry, onClose, onSave, currentStreak }) {
     const [formData, setFormData] = useState({
         entry_date: new Date(),
-        cigarettes_smoked: '',
-        mood: '',
-        triggers: [],
-        notes: '',
+        cigarette_count: '',
+        location: '',
+        remarks: '',
     });
     const [showDatePicker, setShowDatePicker] = useState(false);
-    const [showTimePicker, setShowTimePicker] = useState(false);
     const [errors, setErrors] = useState({});
+    const [showWarning, setShowWarning] = useState(false);
+
+    // Date constants for 2026
+    const YEAR_START = new Date('2026-01-01T00:00:00');
+    const YEAR_END = new Date('2026-12-31T23:59:59');
+    const TODAY = new Date();
+    TODAY.setHours(23, 59, 59, 999); // Set to end of today to allow all of today
 
     useEffect(() => {
         if (entry) {
             setFormData({
-                entry_date: new Date(entry.entry_date),
-                cigarettes_smoked: entry.cigarettes_smoked?.toString() || '',
-                mood: entry.mood || '',
-                triggers: entry.triggers || [],
-                notes: entry.notes || '',
+                entry_date: new Date(entry.date || entry.entry_date),
+                cigarette_count: entry.cigarette_count?.toString() || '',
+                location: entry.location || '',
+                remarks: entry.remarks || '',
             });
+            setShowWarning(false);
         } else {
             setFormData({
                 entry_date: new Date(),
-                cigarettes_smoked: '',
-                mood: '',
-                triggers: [],
-                notes: '',
+                cigarette_count: '',
+                location: '',
+                remarks: '',
             });
+            checkStreakImpact(new Date());
         }
         setErrors({});
     }, [entry, visible]);
 
+    const checkStreakImpact = (selectedDate) => {
+        if (!entry && currentStreak > 0) {
+            const dateStr = selectedDate.toISOString().split('T')[0];
+            const todayStr = new Date().toISOString().split('T')[0];
+
+            // Show warning if adding historical entry during active streak
+            if (dateStr <= todayStr) {
+                setShowWarning(true);
+            } else {
+                setShowWarning(false);
+            }
+        }
+    };
+
     const validateForm = () => {
         const newErrors = {};
 
-        if (!formData.cigarettes_smoked || parseInt(formData.cigarettes_smoked) < 0) {
-            newErrors.cigarettes_smoked = 'Please enter a valid number';
+        if (!formData.cigarette_count || parseInt(formData.cigarette_count) < 1) {
+            newErrors.cigarette_count = 'Must be at least 1';
+        }
+
+        // Date validation
+        const selectedDate = new Date(formData.entry_date);
+        selectedDate.setHours(0, 0, 0, 0);
+
+        if (selectedDate < YEAR_START || selectedDate > YEAR_END) {
+            newErrors.entry_date = 'Date must be within 2026';
+        } else if (selectedDate > TODAY) {
+            newErrors.entry_date = 'Cannot add future smoking entries';
         }
 
         setErrors(newErrors);
@@ -65,12 +98,13 @@ export default function SmokingFormModal({ visible, entry, onClose, onSave }) {
 
     const handleSave = () => {
         if (validateForm()) {
+            // Format date as YYYY-MM-DD for backend
+            const dateStr = formData.entry_date.toISOString().split('T')[0];
             const dataToSave = {
-                entry_date: formData.entry_date.toISOString(),
-                cigarettes_smoked: parseInt(formData.cigarettes_smoked),
-                mood: formData.mood || null,
-                triggers: formData.triggers.length > 0 ? formData.triggers : null,
-                notes: formData.notes || null,
+                date: dateStr,
+                cigarette_count: parseInt(formData.cigarette_count),
+                location: formData.location || null,
+                remarks: formData.remarks || null,
             };
             onSave(dataToSave);
         }
@@ -92,18 +126,12 @@ export default function SmokingFormModal({ visible, entry, onClose, onSave }) {
 
     const onDateChange = (event, selectedDate) => {
         setShowDatePicker(false);
-        if (selectedDate) {
-            setFormData({ ...formData, entry_date: selectedDate });
-        }
-    };
-
-    const onTimeChange = (event, selectedTime) => {
-        setShowTimePicker(false);
-        if (selectedTime) {
-            const newDate = new Date(formData.entry_date);
-            newDate.setHours(selectedTime.getHours());
-            newDate.setMinutes(selectedTime.getMinutes());
-            setFormData({ ...formData, entry_date: newDate });
+        if (selectedDate && event.type !== 'dismissed') {
+            // Set to midnight to avoid timezone issues
+            const normalizedDate = new Date(selectedDate);
+            normalizedDate.setHours(0, 0, 0, 0);
+            setFormData({ ...formData, entry_date: normalizedDate });
+            checkStreakImpact(normalizedDate);
         }
     };
 
@@ -113,6 +141,16 @@ export default function SmokingFormModal({ visible, entry, onClose, onSave }) {
                 <Dialog.Title>{entry ? 'Edit Entry' : 'Log Smoking Entry'}</Dialog.Title>
                 <Dialog.ScrollArea>
                     <ScrollView contentContainerStyle={styles.scrollContent}>
+                        {showWarning && (
+                            <Banner
+                                visible={showWarning}
+                                icon="alert"
+                                style={styles.warningBanner}
+                            >
+                                ⚠️ Adding this entry may affect your clean streak of {currentStreak} days.
+                            </Banner>
+                        )}
+
                         <Button
                             mode="outlined"
                             onPress={() => setShowDatePicker(true)}
@@ -120,78 +158,69 @@ export default function SmokingFormModal({ visible, entry, onClose, onSave }) {
                         >
                             Date: {formData.entry_date.toLocaleDateString()}
                         </Button>
+                        <HelperText type="error" visible={!!errors.entry_date}>
+                            {errors.entry_date}
+                        </HelperText>
 
-                        <Button
-                            mode="outlined"
-                            onPress={() => setShowTimePicker(true)}
-                            style={styles.input}
-                        >
-                            Time: {formData.entry_date.toLocaleTimeString()}
-                        </Button>
-
-                        {showDatePicker && (
+                        {showDatePicker && Platform.OS === 'web' ? (
+                            <input
+                                type="date"
+                                value={formData.entry_date.toISOString().split('T')[0]}
+                                onChange={(e) => {
+                                    if (e.target.value) {
+                                        const selected = new Date(e.target.value + 'T00:00:00');
+                                        setFormData({ ...formData, entry_date: selected });
+                                        checkStreakImpact(selected);
+                                    }
+                                }}
+                                onBlur={() => setShowDatePicker(false)}
+                                max={TODAY.toISOString().split('T')[0]}
+                                min={YEAR_START.toISOString().split('T')[0]}
+                                style={{
+                                    padding: 12,
+                                    fontSize: 16,
+                                    border: '1px solid #ccc',
+                                    borderRadius: 4,
+                                    width: '100%',
+                                    marginBottom: 8
+                                }}
+                            />
+                        ) : showDatePicker ? (
                             <DateTimePicker
                                 value={formData.entry_date}
                                 mode="date"
                                 display="default"
                                 onChange={onDateChange}
+                                maximumDate={TODAY}
+                                minimumDate={YEAR_START}
                             />
-                        )}
-
-                        {showTimePicker && (
-                            <DateTimePicker
-                                value={formData.entry_date}
-                                mode="time"
-                                display="default"
-                                onChange={onTimeChange}
-                            />
-                        )}
+                        ) : null}
 
                         <TextInput
                             label="Cigarettes Smoked *"
-                            value={formData.cigarettes_smoked}
-                            onChangeText={(text) => setFormData({ ...formData, cigarettes_smoked: text })}
+                            value={formData.cigarette_count}
+                            onChangeText={(text) => setFormData({ ...formData, cigarette_count: text })}
                             mode="outlined"
                             keyboardType="numeric"
                             style={styles.input}
-                            error={!!errors.cigarettes_smoked}
+                            error={!!errors.cigarette_count}
                         />
-                        <HelperText type="error" visible={!!errors.cigarettes_smoked}>
-                            {errors.cigarettes_smoked}
+                        <HelperText type="error" visible={!!errors.cigarette_count}>
+                            {errors.cigarette_count}
                         </HelperText>
 
-                        <Title style={styles.sectionTitle}>Mood</Title>
-                        <View style={styles.chipContainer}>
-                            {MOOD_OPTIONS.map((mood) => (
-                                <Chip
-                                    key={mood}
-                                    selected={formData.mood === mood}
-                                    onPress={() => setFormData({ ...formData, mood: mood })}
-                                    style={styles.chip}
-                                >
-                                    {mood}
-                                </Chip>
-                            ))}
-                        </View>
-
-                        <Title style={styles.sectionTitle}>Triggers</Title>
-                        <View style={styles.chipContainer}>
-                            {TRIGGER_OPTIONS.map((trigger) => (
-                                <Chip
-                                    key={trigger}
-                                    selected={formData.triggers.includes(trigger)}
-                                    onPress={() => toggleTrigger(trigger)}
-                                    style={styles.chip}
-                                >
-                                    {trigger}
-                                </Chip>
-                            ))}
-                        </View>
+                        <TextInput
+                            label="Location (e.g., Home, Work, Social, Other)"
+                            value={formData.location}
+                            onChangeText={(text) => setFormData({ ...formData, location: text })}
+                            mode="outlined"
+                            style={styles.input}
+                        />
 
                         <TextInput
-                            label="Notes"
-                            value={formData.notes}
-                            onChangeText={(text) => setFormData({ ...formData, notes: text })}
+                            label="Remarks"
+                            value={formData.remarks}
+                            onChangeText={(text) => setFormData({ ...formData, remarks: text })}
                             mode="outlined"
                             multiline
                             numberOfLines={3}
@@ -219,6 +248,10 @@ const styles = StyleSheet.create({
     },
     input: {
         marginBottom: 8,
+    },
+    warningBanner: {
+        marginBottom: 16,
+        backgroundColor: '#fff3cd',
     },
     sectionTitle: {
         fontSize: 16,

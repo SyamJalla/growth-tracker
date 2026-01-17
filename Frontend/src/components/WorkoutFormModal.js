@@ -1,216 +1,333 @@
 import React, { useState, useEffect } from 'react';
+import { View, StyleSheet, ScrollView, Platform, TextInput as RNTextInput } from 'react-native';
 import {
-    View,
     Modal,
-    ScrollView,
-    StyleSheet,
-    Platform,
-} from 'react-native';
-import {
-    TextInput,
+    Portal,
     Button,
+    TextInput,
     Title,
     HelperText,
-    Portal,
-    Dialog,
-    Paragraph,
+    Chip,
 } from 'react-native-paper';
 import DateTimePicker from '@react-native-community/datetimepicker';
 
-export default function WorkoutFormModal({ visible, workout, onClose, onSave }) {
-    const [formData, setFormData] = useState({
-        workout_type: '',
-        workout_date: new Date(),
-        duration_minutes: '',
-        intensity: '',
-        calories_burned: '',
-        notes: '',
-    });
+// Match backend WorkoutType enum exactly
+const WORKOUT_TYPES = ['Push', 'Pull', 'Legs', 'Upper', 'Lower', 'Cardio', 'Others'];
+
+// Match backend IntensityLevel enum exactly
+const INTENSITY_LEVELS = ['Low', 'Moderate', 'High'];
+
+export default function WorkoutFormModal({ visible, entry, onClose, onSave }) {
+    const [date, setDate] = useState(new Date());
+    const [dateString, setDateString] = useState(''); // For web input
     const [showDatePicker, setShowDatePicker] = useState(false);
-    const [showTimePicker, setShowTimePicker] = useState(false);
+    const [workoutType, setWorkoutType] = useState('');
+    const [duration, setDuration] = useState('');
+    const [intensity, setIntensity] = useState('');
+    const [notes, setNotes] = useState('');
     const [errors, setErrors] = useState({});
 
     useEffect(() => {
-        if (workout) {
-            setFormData({
-                workout_type: workout.workout_type || '',
-                workout_date: new Date(workout.workout_date),
-                duration_minutes: workout.duration_minutes?.toString() || '',
-                intensity: workout.intensity || '',
-                calories_burned: workout.calories_burned?.toString() || '',
-                notes: workout.notes || '',
-            });
+        if (entry) {
+            // Editing existing entry
+            const entryDate = new Date(entry.date + 'T00:00:00');
+            setDate(entryDate);
+            setDateString(entry.date); // YYYY-MM-DD format
+            setWorkoutType(entry.workout_type || '');
+            setDuration(entry.duration_minutes?.toString() || '');
+            setIntensity(entry.intensity || '');
+            setNotes(entry.notes || '');
         } else {
-            setFormData({
-                workout_type: '',
-                workout_date: new Date(),
-                duration_minutes: '',
-                intensity: '',
-                calories_burned: '',
-                notes: '',
-            });
+            // New entry - default to today
+            const today = new Date();
+            setDate(today);
+            setDateString(formatDateForBackend(today));
+            setWorkoutType('');
+            setDuration('');
+            setIntensity('');
+            setNotes('');
         }
         setErrors({});
-    }, [workout, visible]);
+    }, [entry, visible]);
+
+    const formatDateForDisplay = (date) => {
+        return date.toLocaleDateString('en-US', {
+            weekday: 'short',
+            month: 'short',
+            day: 'numeric',
+            year: 'numeric',
+        });
+    };
+
+    const formatDateForBackend = (date) => {
+        // Format as YYYY-MM-DD for backend
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+    };
+
+    const handleDateChange = (event, selectedDate) => {
+        console.log('📅 Date change event:', event.type, 'Selected:', selectedDate);
+
+        // On Android, picker auto-closes after selection
+        if (Platform.OS === 'android') {
+            setShowDatePicker(false);
+        }
+
+        // Update date if user confirmed (not cancelled)
+        if (event.type === 'set' && selectedDate) {
+            console.log('✅ Setting new date:', selectedDate);
+            setDate(selectedDate);
+            setDateString(formatDateForBackend(selectedDate));
+        } else if (event.type === 'dismissed') {
+            console.log('❌ Date picker dismissed');
+            // On iOS, we need to hide the picker when dismissed
+            if (Platform.OS === 'ios') {
+                setShowDatePicker(false);
+            }
+        }
+    };
+
+    // Handle web date input change
+    const handleWebDateChange = (text) => {
+        setDateString(text);
+        // Parse YYYY-MM-DD format
+        const newDate = new Date(text + 'T00:00:00');
+        if (!isNaN(newDate.getTime())) {
+            setDate(newDate);
+        }
+    };
 
     const validateForm = () => {
         const newErrors = {};
 
-        if (!formData.workout_type.trim()) {
-            newErrors.workout_type = 'Workout type is required';
+        if (!workoutType) {
+            newErrors.workoutType = 'Please select a workout type';
         }
 
-        if (!formData.duration_minutes || parseInt(formData.duration_minutes) <= 0) {
-            newErrors.duration_minutes = 'Duration must be greater than 0';
+        if (!duration || parseInt(duration) <= 0) {
+            newErrors.duration = 'Duration must be greater than 0';
         }
 
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
     };
 
-    const handleSave = () => {
-        if (validateForm()) {
-            const dataToSave = {
-                workout_type: formData.workout_type,
-                workout_date: formData.workout_date.toISOString(),
-                duration_minutes: parseInt(formData.duration_minutes),
-                intensity: formData.intensity || null,
-                calories_burned: formData.calories_burned ? parseInt(formData.calories_burned) : null,
-                notes: formData.notes || null,
-            };
-            onSave(dataToSave);
-        }
-    };
+    const handleSubmit = () => {
+        if (!validateForm()) return;
 
-    const onDateChange = (event, selectedDate) => {
-        setShowDatePicker(false);
-        if (selectedDate) {
-            setFormData({ ...formData, workout_date: selectedDate });
-        }
-    };
+        const workoutData = {
+            date: Platform.OS === 'web' ? dateString : formatDateForBackend(date),
+            workout_done: true,
+            workout_type: workoutType,
+            duration_minutes: parseInt(duration),
+            intensity: intensity || null,
+            notes: notes || null,
+        };
 
-    const onTimeChange = (event, selectedTime) => {
-        setShowTimePicker(false);
-        if (selectedTime) {
-            const newDate = new Date(formData.workout_date);
-            newDate.setHours(selectedTime.getHours());
-            newDate.setMinutes(selectedTime.getMinutes());
-            setFormData({ ...formData, workout_date: newDate });
-        }
+        console.log('📤 Submitting workout data:', workoutData);
+        onSave(workoutData);
     };
 
     return (
         <Portal>
-            <Dialog visible={visible} onDismiss={onClose} style={styles.dialog}>
-                <Dialog.Title>{workout ? 'Edit Workout' : 'Log Workout'}</Dialog.Title>
-                <Dialog.ScrollArea>
-                    <ScrollView contentContainerStyle={styles.scrollContent}>
-                        <TextInput
-                            label="Workout Type *"
-                            value={formData.workout_type}
-                            onChangeText={(text) => setFormData({ ...formData, workout_type: text })}
-                            mode="outlined"
-                            style={styles.input}
-                            error={!!errors.workout_type}
-                        />
-                        <HelperText type="error" visible={!!errors.workout_type}>
-                            {errors.workout_type}
-                        </HelperText>
+            <Modal
+                visible={visible}
+                onDismiss={onClose}
+                contentContainerStyle={styles.modal}
+            >
+                <ScrollView>
+                    <Title style={styles.title}>
+                        {entry ? 'Edit Workout' : 'Log Workout'}
+                    </Title>
 
+                    {/* Date Picker - Web vs Mobile */}
+                    {Platform.OS === 'web' ? (
+                        // Web: Use native HTML5 date input
+                        <View style={styles.webDateContainer}>
+                            <Title style={styles.webDateLabel}>Date *</Title>
+                            <RNTextInput
+                                style={styles.webDateInput}
+                                type="date"
+                                value={dateString}
+                                onChange={(e) => handleWebDateChange(e.target.value)}
+                                max={formatDateForBackend(new Date())} // Today
+                                min="2026-01-01" // Year start
+                            />
+                        </View>
+                    ) : (
+                        // Mobile: Use native date picker
+                        <>
+                            <Button
+                                mode="outlined"
+                                onPress={() => setShowDatePicker(true)}
+                                style={styles.dateButton}
+                                icon="calendar"
+                            >
+                                Date: {formatDateForDisplay(date)}
+                            </Button>
+
+                            {showDatePicker && (
+                                <DateTimePicker
+                                    value={date}
+                                    mode="date"
+                                    display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+                                    onChange={handleDateChange}
+                                    testID="dateTimePicker"
+                                />
+                            )}
+                        </>
+                    )}
+
+                    {/* Workout Type */}
+                    <View style={styles.section}>
+                        <Title style={styles.sectionTitle}>Workout Type *</Title>
+                        <View style={styles.chipContainer}>
+                            {WORKOUT_TYPES.map((type) => (
+                                <Chip
+                                    key={type}
+                                    selected={workoutType === type}
+                                    onPress={() => setWorkoutType(type)}
+                                    style={styles.chip}
+                                    selectedColor="#4A90E2"
+                                >
+                                    {type}
+                                </Chip>
+                            ))}
+                        </View>
+                        {errors.workoutType && (
+                            <HelperText type="error">{errors.workoutType}</HelperText>
+                        )}
+                    </View>
+
+                    {/* Duration */}
+                    <TextInput
+                        label="Duration (minutes) *"
+                        value={duration}
+                        onChangeText={setDuration}
+                        keyboardType="numeric"
+                        mode="outlined"
+                        style={styles.input}
+                        error={!!errors.duration}
+                    />
+                    {errors.duration && (
+                        <HelperText type="error">{errors.duration}</HelperText>
+                    )}
+
+                    {/* Intensity */}
+                    <View style={styles.section}>
+                        <Title style={styles.sectionTitle}>Intensity (Optional)</Title>
+                        <View style={styles.chipContainer}>
+                            {INTENSITY_LEVELS.map((level) => (
+                                <Chip
+                                    key={level}
+                                    selected={intensity === level}
+                                    onPress={() => setIntensity(level)}
+                                    style={styles.chip}
+                                    selectedColor="#4A90E2"
+                                >
+                                    {level}
+                                </Chip>
+                            ))}
+                        </View>
+                    </View>
+
+                    {/* Notes */}
+                    <TextInput
+                        label="Notes (Optional)"
+                        value={notes}
+                        onChangeText={setNotes}
+                        multiline
+                        numberOfLines={4}
+                        mode="outlined"
+                        style={styles.input}
+                    />
+
+                    {/* Action Buttons */}
+                    <View style={styles.buttonContainer}>
                         <Button
                             mode="outlined"
-                            onPress={() => setShowDatePicker(true)}
-                            style={styles.input}
+                            onPress={onClose}
+                            style={styles.button}
                         >
-                            Date: {formData.workout_date.toLocaleDateString()}
+                            Cancel
                         </Button>
-
                         <Button
-                            mode="outlined"
-                            onPress={() => setShowTimePicker(true)}
-                            style={styles.input}
+                            mode="contained"
+                            onPress={handleSubmit}
+                            style={styles.button}
+                            buttonColor="#4A90E2"
                         >
-                            Time: {formData.workout_date.toLocaleTimeString()}
+                            {entry ? 'Update' : 'Save'}
                         </Button>
-
-                        {showDatePicker && (
-                            <DateTimePicker
-                                value={formData.workout_date}
-                                mode="date"
-                                display="default"
-                                onChange={onDateChange}
-                            />
-                        )}
-
-                        {showTimePicker && (
-                            <DateTimePicker
-                                value={formData.workout_date}
-                                mode="time"
-                                display="default"
-                                onChange={onTimeChange}
-                            />
-                        )}
-
-                        <TextInput
-                            label="Duration (minutes) *"
-                            value={formData.duration_minutes}
-                            onChangeText={(text) => setFormData({ ...formData, duration_minutes: text })}
-                            mode="outlined"
-                            keyboardType="numeric"
-                            style={styles.input}
-                            error={!!errors.duration_minutes}
-                        />
-                        <HelperText type="error" visible={!!errors.duration_minutes}>
-                            {errors.duration_minutes}
-                        </HelperText>
-
-                        <TextInput
-                            label="Intensity (e.g., Low, Medium, High)"
-                            value={formData.intensity}
-                            onChangeText={(text) => setFormData({ ...formData, intensity: text })}
-                            mode="outlined"
-                            style={styles.input}
-                        />
-
-                        <TextInput
-                            label="Calories Burned"
-                            value={formData.calories_burned}
-                            onChangeText={(text) => setFormData({ ...formData, calories_burned: text })}
-                            mode="outlined"
-                            keyboardType="numeric"
-                            style={styles.input}
-                        />
-
-                        <TextInput
-                            label="Notes"
-                            value={formData.notes}
-                            onChangeText={(text) => setFormData({ ...formData, notes: text })}
-                            mode="outlined"
-                            multiline
-                            numberOfLines={3}
-                            style={styles.input}
-                        />
-                    </ScrollView>
-                </Dialog.ScrollArea>
-                <Dialog.Actions>
-                    <Button onPress={onClose}>Cancel</Button>
-                    <Button onPress={handleSave} mode="contained">
-                        Save
-                    </Button>
-                </Dialog.Actions>
-            </Dialog>
+                    </View>
+                </ScrollView>
+            </Modal>
         </Portal>
     );
 }
 
 const styles = StyleSheet.create({
-    dialog: {
-        maxHeight: '80%',
+    modal: {
+        backgroundColor: 'white',
+        padding: 20,
+        margin: 20,
+        borderRadius: 8,
+        maxHeight: '90%',
     },
-    scrollContent: {
-        paddingHorizontal: 24,
+    title: {
+        fontSize: 24,
+        fontWeight: 'bold',
+        marginBottom: 20,
+        color: '#212529',
+    },
+    dateButton: {
+        marginBottom: 20,
+    },
+    webDateContainer: {
+        marginBottom: 20,
+    },
+    webDateLabel: {
+        fontSize: 16,
+        marginBottom: 8,
+        color: '#495057',
+    },
+    webDateInput: {
+        padding: 12,
+        borderWidth: 1,
+        borderColor: '#CED4DA',
+        borderRadius: 4,
+        fontSize: 16,
+        backgroundColor: '#FFFFFF',
+    },
+    section: {
+        marginBottom: 20,
+    },
+    sectionTitle: {
+        fontSize: 16,
+        marginBottom: 10,
+        color: '#495057',
+    },
+    chipContainer: {
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+        gap: 8,
+    },
+    chip: {
+        marginRight: 8,
+        marginBottom: 8,
     },
     input: {
-        marginBottom: 8,
+        marginBottom: 15,
+    },
+    buttonContainer: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        marginTop: 20,
+    },
+    button: {
+        flex: 1,
+        marginHorizontal: 5,
     },
 });

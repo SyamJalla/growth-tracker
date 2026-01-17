@@ -57,6 +57,30 @@ def create_workout_entry(workout: WorkoutCreate, db: Session = Depends(get_db)):
     return db_workout
 
 
+@router.post("/upsert/", response_model=WorkoutResponse)
+def upsert_workout_entry(workout: WorkoutCreate, db: Session = Depends(get_db)):
+    """Create or update workout entry for a specific date (upsert operation)"""
+    # Check if entry already exists for this date
+    existing = db.query(WorkoutEntry).filter(WorkoutEntry.date == workout.date).first()
+    
+    if existing:
+        # Update existing entry
+        update_data = workout.dict(exclude={'date'})  # Don't update primary key
+        for key, value in update_data.items():
+            setattr(existing, key, value)
+        existing.updated_at = datetime.utcnow()
+        db.commit()
+        db.refresh(existing)
+        return existing
+    else:
+        # Create new entry
+        db_workout = WorkoutEntry(**workout.dict())
+        db.add(db_workout)
+        db.commit()
+        db.refresh(db_workout)
+        return db_workout
+
+
 @router.get("/{entry_date}", response_model=WorkoutResponse)
 def get_workout_entry(entry_date: date, db: Session = Depends(get_db)):
     """Get workout entry for a specific date"""
